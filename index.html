@@ -44,7 +44,8 @@ header::after{content:""; position:absolute; top:-40px; right:-40px; width:160px
 .dot.amber{background:#FFC24B;}
 @keyframes pulso{0%,100%{opacity:1;} 50%{opacity:.4;}}
 .stats-header{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px; position:relative; z-index:1;}
-.stat-item{border-radius:14px; padding:10px 8px; text-align:center; border:none; font-family:inherit; width:100%;}
+.stat-item{border-radius:14px; padding:10px 8px; text-align:center; border:none; font-family:inherit; width:100%; color:#fff;}
+.stat-item b, .stat-item span{color:#fff;}
 .stat-item:active{transform:scale(.95);}
 .stat-item b{display:block; font-size:1.3rem; font-family:'Bricolage Grotesque'; line-height:1;}
 .stat-item span{display:block; font-size:.68rem; opacity:.85; margin-top:3px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;}
@@ -55,6 +56,8 @@ nav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; 
   padding:6px 4px calc(10px + env(safe-area-inset-bottom));}
 nav button{flex:1; min-height:54px; background:none; border:none; border-radius:14px; font-size:.64rem; font-weight:700; color:var(--gris); line-height:1.2; padding:6px 2px;}
 nav button .ico{display:block; font-size:1.2rem; margin-bottom:2px;}
+nav button .ico-img{width:22px; height:22px; margin:0 auto 3px; border-radius:7px; overflow:hidden;}
+nav button.mapa-tab .ico-img{width:26px; height:26px;}
 nav button.active{color:var(--azul); background:var(--azul-bruma);}
 /* Tab central destacado: el mapa */
 nav button.mapa-tab{flex:1.25; color:#fff; background:var(--azul); border-radius:18px; margin:0 4px; min-height:62px; box-shadow:0 4px 14px rgba(20,48,79,.3); transform:translateY(-8px);}
@@ -252,7 +255,7 @@ details.paso[open] summary .mas{transform:rotate(45deg);}
 .chip-e b{font-size:1.15rem; font-family:'Bricolage Grotesque';}
 .chip-e span{font-size:.72rem; font-weight:700; text-align:center;}
 .ruta{display:flex; gap:14px; align-items:center; background:var(--blanco); border:1px solid var(--linea); border-radius:var(--r); margin:12px 18px; padding:16px 18px; text-align:left; width:calc(100% - 36px); box-shadow:var(--sombra); border-left:5px solid var(--azul-med);}
-.ruta .ico-g{width:50px; height:50px; border-radius:16px; background:var(--azul-bruma); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;}
+.ruta .ico-g{width:50px; height:50px; border-radius:16px; background:var(--azul-bruma); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; overflow:hidden;}
 .ruta h2{font-size:1.08rem; color:var(--azul);}
 .ruta p{font-size:.87rem; color:var(--gris); margin-top:2px; font-family:'Atkinson Hyperlegible';}
 .ruta .flecha{margin-left:auto; color:var(--azul-med); font-size:1.4rem; flex-shrink:0;}
@@ -262,9 +265,11 @@ details.paso[open] summary .mas{transform:rotate(45deg);}
 .confirmacion h3{color:var(--verde); margin:8px 0;}
 .error-envio{display:none; background:var(--rojo-luz); border-radius:14px; margin:12px 18px; padding:14px; font-size:.9rem; color:var(--rojo);}
 .error-envio.on{display:block;}
-.rama{display:flex; gap:10px; margin:12px 18px;}
-.rama button{flex:1; min-height:76px; border-radius:16px; border:1.5px solid var(--linea); background:var(--blanco); font-size:.9rem; font-weight:700; color:var(--gris); padding:12px; line-height:1.3;}
-.rama button.on{border-color:var(--azul); color:var(--azul); background:var(--azul-bruma);}
+.rama{display:flex; gap:10px; margin:12px 18px; position:relative;}
+.rama input[type="radio"]{position:absolute; opacity:0; width:1px; height:1px; margin:0;}
+.rama label{flex:1; min-height:76px; border-radius:16px; border:1.5px solid var(--linea); background:var(--blanco); font-size:.9rem; font-weight:700; color:var(--gris); padding:12px; line-height:1.3; display:flex; align-items:center; justify-content:center; text-align:center; cursor:pointer; transition:border-color .15s ease, background-color .15s ease, color .15s ease;}
+.rama input[type="radio"]:checked + label{border-color:var(--azul); color:var(--azul); background:var(--azul-bruma);}
+.rama input[type="radio"]:focus-visible + label{outline:3px solid var(--ambar); outline-offset:2px;}
 .consent{display:flex; gap:12px; align-items:flex-start; margin:14px 18px; font-size:.9rem; background:var(--blanco); border:1px solid var(--linea); border-radius:14px; padding:14px;}
 .consent input{width:26px; height:26px; margin-top:2px; flex-shrink:0; accent-color:var(--azul);}
 .wrap{padding:0 18px;}
@@ -280,7 +285,7 @@ footer b{color:#FFD9A8;}
 
 <header>
   <div class="brand">
-    <div class="logo" aria-hidden="true">🧭</div>
+    <div class="logo" aria-hidden="true"><img src="data:image/jpeg;base64,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" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:11px;"></div>
     <h1>Brújula Colombia<small>Mapa de ayuda e información verificada</small></h1>
   </div>
   <span class="updated"><span class="dot" id="dot-estado" aria-hidden="true"></span> <span id="fecha-actualizacion">Información revisada: 13 de agosto</span></span>
@@ -413,18 +418,23 @@ footer b{color:#FFD9A8;}
   <p class="sub" style="margin-top:16px;">Además del mapa, aquí tienes <b>información verificada</b> con fuentes oficiales:</p>
 
   <button class="ruta" data-go="r1">
-    <span class="ico-g" aria-hidden="true">🤝</span>
+    <span class="ico-g" aria-hidden="true"><img src="data:image/jpeg;base64,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" alt="" style="width:100%;height:100%;object-fit:cover;"></span>
     <span><h2>Necesito ayuda</h2><p>Registro, subsidios, mi casa, buscar a alguien, apoyo emocional.</p></span>
     <span class="flecha" aria-hidden="true">›</span>
   </button>
   <button class="ruta" data-go="r2">
-    <span class="ico-g" aria-hidden="true">💛</span>
+    <span class="ico-g" aria-hidden="true"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCACgAKADASIAAhEBAxEB/8QAGwABAAIDAQEAAAAAAAAAAAAAAAUIAwYHBAL/xAAwEAEAAQIEAggFBQEAAAAAAAAAAQIDBAUGESFBBxMUIjFRcbESMmGRoVJTcoHB8P/EABoBAQACAwEAAAAAAAAAAAAAAAACBAEDBgX/xAAgEQEAAgICAgMBAAAAAAAAAAAAAQIDBBESITEFFEFh/9oADAMBAAIRAxEAPwCAAQcKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3jRfRtitTWKcfjLtWDy+Z7kxG9y7/HfhEfWf6GzFivlt1pHMtHHda+h/TNVj4Ke201/uRf3n7bbfhzrWXR7jtKR2q3c7Zl0zt10U7VW5nwiuP8AY4ehws5tHNhr2mPH8aeNw0b0eY7VcdquXOx5dE7ddNO9VyY8Yoj/AGeHq6LR0P6ZpsfBV22qv9yb+0/aI2/BwYdHNmr2rHj+uFDeNadG2L0zYqx+Du1YzL4nvzMbXLX8tuEx9Y/to4rZcV8Vut44kAGsAAAAAAAAABK6YymM91RgMtr3i3fuxFzbx+CImavxErMWbVuxYos2qKbdu3TFNNNMbRTEcIiFctC4+jLddZViLsxTb67q6pnwj44mnf7zCyCUOh+JivS0/vIw4zB2Mfgr2ExNuLli9RNFdM84mNpZhl7Exz4lhweDsYDBWcJhrcW7FmiKKKY5REbQzAERx4h8XrVu/Yrs3aKblu5TNNVNUbxVE8JiVZ9T5TGRaozDLaN+rsXZi3v4/BPGn8TCzat+usfRmWus1xFqYqt9d1dMx4T8ERTv94liXj/LRXpWf3lr4CLngAAAAAAAAAD0nb0WF6PtV0am09R1tcdvwsRbxFPOZ5V+k++6vST0/n2M03nNrMcFV36OFdEz3blM+NM/9wniRK5p7P18nM+p9rOiL09qDA6lym3j8Dc3pq4V0T81urnTMefulE3WVtFo7V9AIrUWocDprKbmPx1e1McKLcfNcq5Ux9fYLWisdrekT0g6ro0zp6uLVcdvxUTbw9POPOv0j32V6/vf1SeoM+xmpM5u5jjau/Xwooj5bdPKmPp7zxRiEy5Pc2fsZOY9R6ABTAAAAAAAAAAAATGmtTY/S+aRjMFXvTO0XbNU9y7T5T9fKeSwGmtT5dqjLYxeBud6naLtmr57VXlMe0+EqzvdlGcY7Isyt47L79Vm9R5cYqj9NUc4ZiV/U3ba89Z81WJ1LqjL9LZZOLxtzeureLVmme/dq8oj3nwhX/UmpcfqjNKsZjq9ojhatUz3LVPlH+zzebN84x2e5lcx2YX5vX6/PwpjlTTHKPo8JMm3u22J4jxUAYUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH//2Q==" alt="" style="width:100%;height:100%;object-fit:cover;"></span>
     <span><h2>Donar seguro y voluntarios</h2><p>Cuentas verificadas, qué se necesita hoy y personas que ayudan.</p></span>
     <span class="flecha" aria-hidden="true">›</span>
   </button>
   <button class="ruta" data-go="rform">
-    <span class="ico-g" aria-hidden="true">🙋</span>
+    <span class="ico-g" aria-hidden="true"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCACgAKADASIAAhEBAxEB/8QAGAABAAMBAAAAAAAAAAAAAAAAAAMHCAX/xAAvEAABBAEBBAgHAQEAAAAAAAAAAQIDBAUGERJxkQcIEyFBQ4GSFBUiMkJRYaLR/8QAGAEBAQEBAQAAAAAAAAAAAAAAAAMEBQH/xAAbEQEAAwADAQAAAAAAAAAAAAAAAQIDEiFBEf/aAAwDAQACEQMRAD8ApcAHWc0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACanUmv369Ou3fnsythjb+3OVEROagQgmuVJqF+xTsN3J60roZG/pzVVFTmhCAAAAAAAAAAAAAAAAAAAAAACxOg3A/O+lGlK9m9DjGOuP4p9LP8ATkX0K7NI9W7AfCaWyOckZsffn7GNVTy4/wBcXOdyJa240lTOPtoVl05YH5J0o3ZWM3YcmxtxnFfpf/pqr6ldmkesjgPi9L47ORs2voT9jIqJ5cn/ABzW8zNwytypBpHy0gAKpgAAAAAAAAAAAAAATVKdq/ZbXp1prUzvtjhjV7l9ERVAhBYmB6DdbZvdfLQjxULvzuv3XexNruaIWZgOrdhKu7JnMpayMid6xQJ2EfDxcvNCVtaV9UjO0+M4Na5z2sY1XSOXY1qd6uXwRENuaLwTdM6KxOHRNjqtdrZP69U2vX3KowWitN6ZaiYfDVKbk8xsaLIvF67XLzO4ZddefUNGefDuXD1pgm6m0VlsOqbXWq7mx/x6JtYvuRDEbmua9zHtVsjV2OavcrV8UVDfBw87orTepmqmYw1S45fMdGiSJwemxycxlrw6k0z59wxEDSOf6t2Etb0mDylrHPXvSKdO3j4eDk5qVlnug3W2E3nxUI8rC386L953sXY7kimqutLes852jxXYJrdO1Qsur3K01WZv3RzRqxyeioikJVMAAAAAAAAAAAmqXLVCy2xTszVZm/bJDIrHJ6ou0hAFiYHpy1thN1kt+PKwt/C6zed702O57SzcB1kcJa3Y85i7WOevcssC9vHx8HJyUzcCVsqW8UjS0etu4LWum9TNRcPmalxy+W2REkTixdjk5HcMDtc5r2vY5WyNXa1ydytXwVFNuaLzrdTaKxOYRdrrVdrpP49E2PT3Ipl1y4dw0Z6c+pdw4ed1rpvTLVXMZmpTcnlukRZF4MTa5eQ1pnW6Z0Vlswq7HVa7nR/16psYnuVDEbnOc9z3uV0jl2ucverl8VVRllz7l7ppw6ho/P8AWRwlXejweLtZF6dySzr2EfHZ3uXkhWee6cdbZveZFfjxULvwos3Xe9druSoV2DVXKlfGadLT6mt3LV+y6xcszWpnfdJNIr3L6qu0hAKpgAAAAAAAAAAAAAAABpHq3Z74vS2Rwcj9r6E/bRoq+XJ/xzXczNxYnQbnvknSjSie/dhybHU38V+pn+monqS1rypKmc/LQs3rI5/4TS+Owcb9j78/bSIi+XH++LnN5GbixOnLPfO+lG7Ex+9DjWNps4p9T/8ATlT0K7GVeNINJ+2kABVMAAAAAAAAAAAAAAAAAAAmp25qF+vcru3J60rZo3fpzVRUXmhCAJrlua/fsXLDt+ezK6aR37c5VVV5qQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf//Z" alt="" style="width:100%;height:100%;object-fit:cover;"></span>
     <span><h2>Ofrezco mi ayuda</h2><p>Psicólogos y profes por internet, ingenieros, transporte y más.</p></span>
+    <span class="flecha" aria-hidden="true">›</span>
+  </button>
+  <button class="ruta" data-go="r3">
+    <span class="ico-g" aria-hidden="true"><img src="data:image/jpeg;base64,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" alt="" style="width:100%;height:100%;object-fit:cover;"></span>
+    <span><h2>Soy un albergue o punto de ayuda</h2><p>Cuéntanos qué necesita tu punto hoy, lo confirmamos y lo publicamos.</p></span>
     <span class="flecha" aria-hidden="true">›</span>
   </button>
 
@@ -439,6 +449,16 @@ footer b{color:#FFD9A8;}
   <button class="volver">‹ Volver</button>
   <h2 class="h-section">Guía paso a paso</h2>
   <p class="sub">Toca cada tema para ver qué hacer, explicado sin palabras técnicas.</p>
+
+  <div class="card" style="background:var(--rojo-luz); border:none; display:flex; gap:14px; align-items:center;">
+    <span style="font-size:1.6rem; flex-shrink:0;">📍</span>
+    <div style="flex:1;">
+      <p style="font-weight:700; color:var(--rojo); font-size:.95rem;">¿Tu necesidad es puntual y urgente?</p>
+      <p style="font-size:.85rem; color:var(--tinta); margin-top:2px;">Publícala directo en el mapa: agua, un techo, ayuda para mover escombros…</p>
+    </div>
+  </div>
+  <div class="wrap"><button class="btn btn-primario" id="btn-publicar-desde-r1" style="margin:0 0 8px;">📍 Publicar mi necesidad en el mapa</button></div>
+
   <details class="paso" open>
     <summary><span class="num">1</span>Registrarme como damnificado<span class="mas" aria-hidden="true">+</span></summary>
     <div class="paso-body">
@@ -564,15 +584,17 @@ footer b{color:#FFD9A8;}
   <h2 class="h-section">Ofrece tu ayuda</h2>
   <p class="sub">Gracias por querer ayudar 💙. Revisamos cada perfil y te respondemos en <b>máximo 48 horas</b>.</p>
   <p style="margin:4px 18px; font-weight:700;">¿Tu profesión tiene tarjeta o registro profesional?</p>
-  <div class="rama" role="radiogroup">
-    <button class="on" data-rama="prof" role="radio" aria-checked="true">✅ Sí, soy profesional con registro</button>
-    <button data-rama="gral" role="radio" aria-checked="false">🤲 No, ofrezco otra ayuda</button>
+  <div class="rama" role="radiogroup" aria-label="Tipo de ayuda">
+    <input type="radio" name="tipoAyuda" id="radio-prof" value="prof" checked>
+    <label for="radio-prof">✅ Sí, soy profesional con registro</label>
+    <input type="radio" name="tipoAyuda" id="radio-gral" value="gral">
+    <label for="radio-gral">🤲 No, ofrezco otra ayuda</label>
   </div>
   <form id="form-persona" onsubmit="return false;">
     <div class="campo" style="margin:12px 18px;"><label for="f-nombre">Tu nombre completo *</label><input id="f-nombre" type="text" placeholder="Ej.: María González Pérez"><p class="apoyo">Solo se mostrará "María G."</p></div>
     <div class="campo" data-solo="prof" style="margin:12px 18px;"><label for="f-cedula">Tu número de cédula *</label><input id="f-cedula" type="text" inputmode="numeric" placeholder="Solo números"><p class="apoyo">🔒 Solo para verificar tu tarjeta profesional. <b>Nunca se publica.</b></p></div>
     <div class="campo" data-solo="prof" style="margin:12px 18px;"><label for="f-prof">Tu profesión *</label><select id="f-prof"><option value="">Elige…</option><option>Psicología</option><option>Medicina</option><option>Enfermería</option><option>Ingeniería civil / estructural</option><option>Arquitectura</option><option>Derecho</option></select></div>
-    <div class="campo" data-solo="gral" style="margin:12px 18px; display:none;"><label for="f-tipo">¿Qué ayuda ofreces? *</label><select id="f-tipo"><option value="">Elige…</option><option>Clases / refuerzo escolar por internet</option><option>Transporte</option><option>Clasificar donaciones</option><option>Traducción</option><option>Otra</option></select></div>
+    <div class="campo" data-solo="gral" style="margin:12px 18px; display:none; background:var(--azul-bruma); border-radius:14px; padding:14px; border:1.5px solid var(--azul-med);"><label for="f-tipo">¿Qué ayuda ofreces? *</label><select id="f-tipo"><option value="">Elige…</option><option>Clases / refuerzo escolar por internet</option><option>Transporte</option><option>Clasificar donaciones</option><option>Traducción</option><option>Otra</option></select></div>
     <div class="campo" style="margin:12px 18px;"><label for="f-modo">¿Cómo puedes ayudar?</label><select id="f-modo"><option>💻 Por internet o teléfono</option><option>📍 En persona</option></select></div>
     <div class="campo" style="margin:12px 18px;"><label for="f-disp">¿Qué días y horas?</label><input id="f-disp" type="text" placeholder="Ej.: jueves 5 y 6 p. m."></div>
     <div class="campo" style="margin:12px 18px;"><label for="f-contacto">WhatsApp para recibir solicitudes *</label><input id="f-contacto" type="tel" placeholder="Ej.: 300 123 4567"></div>
@@ -581,6 +603,36 @@ footer b{color:#FFD9A8;}
     <div class="wrap"><button type="button" class="btn btn-primario" id="btn-enviar">Enviar mi ofrecimiento</button></div>
   </form>
   <div class="confirmacion" id="conf"><span class="check">✅</span><h3>¡Recibimos tu ofrecimiento!</h3><p>Te escribiremos en <b>máximo 48 horas</b>. Gracias 💙</p></div>
+</section>
+
+<!-- ════════════ SOY UN PUNTO ════════════ -->
+<section id="r3" data-nav="home" aria-label="Soy un albergue o punto de ayuda">
+  <button class="volver">‹ Volver</button>
+  <h2 class="h-section">Cuéntanos qué necesita tu punto</h2>
+  <p class="sub">Para albergues, centros de acopio y organizaciones. Publicamos tu reporte después de confirmarlo por teléfono.</p>
+  <form id="form-punto" onsubmit="return false;">
+    <div class="campo"><label for="o-nombre">Nombre del punto u organización *</label><input id="o-nombre" type="text" placeholder="Ej.: Albergue Coliseo del Café" required></div>
+    <div class="campo"><label for="o-dir">Ciudad y dirección *</label><input id="o-dir" type="text" placeholder="Ej.: Pereira, Calle 14 #23-50" required></div>
+    <div class="campo">
+      <label for="o-contacto">Teléfono de un responsable y su cargo *</label>
+      <input id="o-contacto" type="tel" placeholder="Ej.: 310 555 4433 — coordinadora" required>
+      <p class="apoyo">Llamaremos a este número para confirmar antes de publicar.</p>
+    </div>
+    <div class="campo"><label for="o-si">¿Qué SÍ necesitan hoy? *</label><textarea id="o-si" placeholder="Ej.: agua, pañales talla M, gasas"></textarea></div>
+    <div class="campo">
+      <label for="o-no">¿Qué YA NO reciben? *</label>
+      <textarea id="o-no" placeholder="Ej.: ropa usada"></textarea>
+      <p class="apoyo">Muy importante: evita que la gente lleve cosas que ya no caben o no sirven.</p>
+    </div>
+    <div class="campo"><label for="o-prof">¿Necesitan voluntarios o profesionales? ¿Cuáles?</label><input id="o-prof" type="text" placeholder="Ej.: 2 enfermeras, ayuda de carga en la tarde"></div>
+    <div class="error-envio" id="err-punto">No pudimos enviar tu reporte. Revisa tu conexión e inténtalo de nuevo.</div>
+    <div class="wrap"><button type="button" class="btn btn-primario" id="btn-org">Enviar reporte</button></div>
+  </form>
+  <div class="confirmacion" id="conf-org" role="status">
+    <span class="check" aria-hidden="true">✅</span>
+    <h3>¡Reporte recibido!</h3>
+    <p>Te llamaremos para confirmarlo y lo publicamos en seguida. Gracias por mantener la información al día.</p>
+  </div>
 </section>
 
 <!-- ════════════ AHORA ════════════ -->
@@ -616,10 +668,10 @@ footer b{color:#FFD9A8;}
 
 <nav aria-label="Secciones">
   <button data-t="home"><span class="ico" aria-hidden="true">🏠</span>Inicio</button>
-  <button data-t="r1"><span class="ico" aria-hidden="true">🤝</span>Necesito<br>ayuda</button>
-  <button class="mapa-tab active" data-t="mapa-sec"><span class="ico" aria-hidden="true">🗺️</span>Mapa</button>
-  <button data-t="r2"><span class="ico" aria-hidden="true">💛</span>Donar</button>
-  <button data-t="rform"><span class="ico" aria-hidden="true">🙋</span>Ofrezco<br>ayuda</button>
+  <button data-t="r1"><span class="ico ico-img" aria-hidden="true"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCACgAKADASIAAhEBAxEB/8QAGwABAQADAQEBAAAAAAAAAAAAAAcFBggEAwL/xAAwEAABAwQABAUCBgMBAAAAAAAAAQIDBAUGEQcSIUETFDFRYSJxMoGRobHBM1Jy8P/EABoBAQADAQEBAAAAAAAAAAAAAAADBAUGAgf/xAApEQEAAQMCBQIHAQAAAAAAAAAAAQIDBBETBRIhMUEiYQYyUYGRocHR/9oADAMBAAIRAxEAPwDAAA5x9eAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3jC+G1Vk0Da+sldR29V+hUTckv/ADvoifK/keqKKq50pV8jIt41G5dnSGjguruD+MrByN861+v8iT7X9Na/YnOZcPa7FE81HJ5y3KuvGRunRqvoj0/tOn2Jq8a5RGsqONxfFya9umdJ9/LUAbhhvD2uypPNSSeTtyLrxlbt0ip6oxP7Xp9yiM4P4y2Dkcta5+v8iz6X9ETX7CjGuVxrBk8XxcavbqnWfbwhYN4zThtV4zA6vo5XVlvRfrcqaki/610VPlPzNHIa6KqJ0qXsfIt5NG5anWAAHlYAAAAAAAAAAAAAGVxi0pfcnoLa/fhzyokmvXkRNu/ZFOmIYY4IGQxMbHHG1Gta1NI1E6IiHOWC17LbnNqqJVRsfjeG5V7c6K3f6qh0gamFEcsz5cT8R1V71FM9tP3r1/gfCtpIK+impKmNJIJ2Kx7V7oqaU+5KeKGV3yxZNT01tuD6aF9K16sa1q7dzOTfVF9kLV25FunmqYeFi15V2LdudJ7/AIU+jpIKCihpKaNI4IWIxjU7IiaQ+5KeF+V3y+5NUU1yuD6mFlK56Nc1qadzNTfRE91KsLVyLlPNSZuLXi3Zt3J1nv8Al+Joo54HwysbJHI1Wua5No5F6KinM+T2lLFk9fbWb8OCVUj368iptv7Kh02c351XsuWc3WoiVHR+N4bVTvyIjd/qilXNiOWJ8tz4cqr3q6Y7afvXp/WvgAy3bAAAAAAAAAAAAAB+evsdC8PsrZk2PM8Z6efpUSOob3X2f9l/nZz0ZPH79WY3eYrjRO+tnR7F/DI3u1f/AHRepPYvbVWvhlcUwIzbPLHzR2/z7qNxHzW/2DK0o7bWpBB5dj+VYmO6qrtrtU+EJver9cchrGVVzqEnmYxI2uRiN03arrSJ7qpZ47HivEeKO+vbNJKrEie1JlYsapteVyJ36/mTXiPjtvxrIYKO2xvZC+mSRyPer15uZyeq/CITZFNcxNevpZ/Cr2NFVOPt6XIjrOkffr3YKy36449WPqrZUJBM9ixucrEdtu0XWlT3RCkcOM1v9/ytaO5VqTweXfJypExvVFbrqifKmqcOMdt+S5DUUdyje+FlMsjUY9WLzczU9U+FUpMtkxXhvFJfGMmjlRixMYsyvWRV0vKiL36evYY9NcRFevpOK3saaqsfb1uTHSdI89uvd7uIOVsxnHnpC9PP1SLHTt7p7v8Asn86Oevuu/uZPIL9WZJeZbjWu+t/RjE/DG3s1Pj+V6mMIb97dq18NDheBGFZ5Z+ae/8An2AAQNUAAAAAAAAAAAAAAABmMayavxe6JWUT9tXSSwuX6JW+y/0vYrTbVi/FFsV3dLUpPFGkMkLJeR0XVV05NfK9fRSGnutF4rrFco663zuhmZ7ejk/1cndPgntXuX01RrDKzcDendszy3I8/X2lZH2rF+FzZbu2WpWoljWGOF8vM6Xqi6RNfCbX0QkmSZLX5RdHVlc/SJ0iiav0RN9k/te55rveK6+3KSuuE7pp3+/o1OzWp2T4PCLt7m9NMaQYWBsTu3p5rk+fp7QAAgaoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/9k=" alt="" style="width:100%;height:100%;object-fit:cover;"></span>Necesito<br>ayuda</button>
+  <button class="mapa-tab active" data-t="mapa-sec"><span class="ico ico-img" aria-hidden="true"><img src="data:image/jpeg;base64,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" alt="" style="width:100%;height:100%;object-fit:cover;"></span>Mapa</button>
+  <button data-t="r2"><span class="ico ico-img" aria-hidden="true"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCACgAKADASIAAhEBAxEB/8QAGwABAAIDAQEAAAAAAAAAAAAAAAUIAwYHBAL/xAAwEAEAAQIEAggFBQEAAAAAAAAAAQIDBAUGESFBBxMUIjFRcbESMmGRoVJTcoHB8P/EABoBAQACAwEAAAAAAAAAAAAAAAACBAEDBgX/xAAgEQEAAgICAgMBAAAAAAAAAAAAAQIDBBESITEFFEFh/9oADAMBAAIRAxEAPwCAAQcKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA3jRfRtitTWKcfjLtWDy+Z7kxG9y7/HfhEfWf6GzFivlt1pHMtHHda+h/TNVj4Ke201/uRf3n7bbfhzrWXR7jtKR2q3c7Zl0zt10U7VW5nwiuP8AY4ehws5tHNhr2mPH8aeNw0b0eY7VcdquXOx5dE7ddNO9VyY8Yoj/AGeHq6LR0P6ZpsfBV22qv9yb+0/aI2/BwYdHNmr2rHj+uFDeNadG2L0zYqx+Du1YzL4nvzMbXLX8tuEx9Y/to4rZcV8Vut44kAGsAAAAAAAAABK6YymM91RgMtr3i3fuxFzbx+CImavxErMWbVuxYos2qKbdu3TFNNNMbRTEcIiFctC4+jLddZViLsxTb67q6pnwj44mnf7zCyCUOh+JivS0/vIw4zB2Mfgr2ExNuLli9RNFdM84mNpZhl7Exz4lhweDsYDBWcJhrcW7FmiKKKY5REbQzAERx4h8XrVu/Yrs3aKblu5TNNVNUbxVE8JiVZ9T5TGRaozDLaN+rsXZi3v4/BPGn8TCzat+usfRmWus1xFqYqt9d1dMx4T8ERTv94liXj/LRXpWf3lr4CLngAAAAAAAAAD0nb0WF6PtV0am09R1tcdvwsRbxFPOZ5V+k++6vST0/n2M03nNrMcFV36OFdEz3blM+NM/9wniRK5p7P18nM+p9rOiL09qDA6lym3j8Dc3pq4V0T81urnTMefulE3WVtFo7V9AIrUWocDprKbmPx1e1McKLcfNcq5Ux9fYLWisdrekT0g6ro0zp6uLVcdvxUTbw9POPOv0j32V6/vf1SeoM+xmpM5u5jjau/Xwooj5bdPKmPp7zxRiEy5Pc2fsZOY9R6ABTAAAAAAAAAAAATGmtTY/S+aRjMFXvTO0XbNU9y7T5T9fKeSwGmtT5dqjLYxeBud6naLtmr57VXlMe0+EqzvdlGcY7Isyt47L79Vm9R5cYqj9NUc4ZiV/U3ba89Z81WJ1LqjL9LZZOLxtzeureLVmme/dq8oj3nwhX/UmpcfqjNKsZjq9ojhatUz3LVPlH+zzebN84x2e5lcx2YX5vX6/PwpjlTTHKPo8JMm3u22J4jxUAYUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH//2Q==" alt="" style="width:100%;height:100%;object-fit:cover;"></span>Donar</button>
+  <button data-t="rform"><span class="ico ico-img" aria-hidden="true"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAcFBQYFBAcGBgYIBwcICxILCwoKCxYPEA0SGhYbGhkWGRgcICgiHB4mHhgZIzAkJiorLS4tGyIyNTEsNSgsLSz/2wBDAQcICAsJCxULCxUsHRkdLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCz/wAARCACgAKADASIAAhEBAxEB/8QAGAABAAMBAAAAAAAAAAAAAAAAAAMHCAX/xAAvEAABBAEBBAgHAQEAAAAAAAAAAQIDBAUGERJxkQcIEyFBQ4GSFBUiMkJRYaLR/8QAGAEBAQEBAQAAAAAAAAAAAAAAAAMEBQH/xAAbEQEAAwADAQAAAAAAAAAAAAAAAQIDEiFBEf/aAAwDAQACEQMRAD8ApcAHWc0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACanUmv369Ou3fnsythjb+3OVEROagQgmuVJqF+xTsN3J60roZG/pzVVFTmhCAAAAAAAAAAAAAAAAAAAAAACxOg3A/O+lGlK9m9DjGOuP4p9LP8ATkX0K7NI9W7AfCaWyOckZsffn7GNVTy4/wBcXOdyJa240lTOPtoVl05YH5J0o3ZWM3YcmxtxnFfpf/pqr6ldmkesjgPi9L47ORs2voT9jIqJ5cn/ABzW8zNwytypBpHy0gAKpgAAAAAAAAAAAAAATVKdq/ZbXp1prUzvtjhjV7l9ERVAhBYmB6DdbZvdfLQjxULvzuv3XexNruaIWZgOrdhKu7JnMpayMid6xQJ2EfDxcvNCVtaV9UjO0+M4Na5z2sY1XSOXY1qd6uXwRENuaLwTdM6KxOHRNjqtdrZP69U2vX3KowWitN6ZaiYfDVKbk8xsaLIvF67XLzO4ZddefUNGefDuXD1pgm6m0VlsOqbXWq7mx/x6JtYvuRDEbmua9zHtVsjV2OavcrV8UVDfBw87orTepmqmYw1S45fMdGiSJwemxycxlrw6k0z59wxEDSOf6t2Etb0mDylrHPXvSKdO3j4eDk5qVlnug3W2E3nxUI8rC386L953sXY7kimqutLes852jxXYJrdO1Qsur3K01WZv3RzRqxyeioikJVMAAAAAAAAAAAmqXLVCy2xTszVZm/bJDIrHJ6ou0hAFiYHpy1thN1kt+PKwt/C6zed702O57SzcB1kcJa3Y85i7WOevcssC9vHx8HJyUzcCVsqW8UjS0etu4LWum9TNRcPmalxy+W2REkTixdjk5HcMDtc5r2vY5WyNXa1ydytXwVFNuaLzrdTaKxOYRdrrVdrpP49E2PT3Ipl1y4dw0Z6c+pdw4ed1rpvTLVXMZmpTcnlukRZF4MTa5eQ1pnW6Z0Vlswq7HVa7nR/16psYnuVDEbnOc9z3uV0jl2ucverl8VVRllz7l7ppw6ho/P8AWRwlXejweLtZF6dySzr2EfHZ3uXkhWee6cdbZveZFfjxULvwos3Xe9druSoV2DVXKlfGadLT6mt3LV+y6xcszWpnfdJNIr3L6qu0hAKpgAAAAAAAAAAAAAAABpHq3Z74vS2Rwcj9r6E/bRoq+XJ/xzXczNxYnQbnvknSjSie/dhybHU38V+pn+monqS1rypKmc/LQs3rI5/4TS+Owcb9j78/bSIi+XH++LnN5GbixOnLPfO+lG7Ex+9DjWNps4p9T/8ATlT0K7GVeNINJ+2kABVMAAAAAAAAAAAAAAAAAAAmp25qF+vcru3J60rZo3fpzVRUXmhCAJrlua/fsXLDt+ezK6aR37c5VVV5qQgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAf//Z" alt="" style="width:100%;height:100%;object-fit:cover;"></span>Ofrezco<br>ayuda</button>
 </nav>
 </div>
 
@@ -763,6 +815,12 @@ document.querySelectorAll('.stat-item').forEach(b=>b.addEventListener('click',()
     document.getElementById('contenedorTarjetas')?.scrollIntoView({behavior:'smooth',block:'start'});
   },300);
 }));
+
+// Acceso directo desde "Necesito ayuda" para publicar en el mapa
+document.getElementById('btn-publicar-desde-r1')?.addEventListener('click',()=>{
+  go('mapa-sec');
+  setTimeout(()=>{ if(typeof abrirFormularioNueva==='function') abrirFormularioNueva(); },350);
+});
 
 /* ═══════════ MAPA (Leaflet + Firebase) ═══════════ */
 let imagenBase64Actual=null, marcadorPicker=null, ubicacionUsuarioGPS=null;
@@ -1022,8 +1080,6 @@ function cerrarImagenFull(){ document.getElementById('modalImagenFull').classLis
 /* Formulario del mapa */
 function abrirFormulario(){ document.getElementById('modalFormulario').classList.add('on'); }
 function cerrarFormulario(){ document.getElementById('modalFormulario').classList.remove('on'); }
-function abrirInstrucciones(){ document.getElementById('modalInstrucciones').classList.add('on'); }
-function cerrarInstrucciones(){ document.getElementById('modalInstrucciones').classList.remove('on'); }
 function abrirFormularioNueva(){
   if(!mapa){ alert('El mapa no está disponible en este momento (puede ser tu conexión). Intenta recargar la página en unos segundos.'); return; }
   const c=mapa.getCenter();
@@ -1154,16 +1210,26 @@ activarAutocompletado('campoUbicacion','sugerenciasFormulario');
 
 /* Envío formulario voluntarios → Sheet */
 async function enviarSheet(datos){ if(!CONFIG.API_URL||CONFIG.API_URL.startsWith('PEGA'))throw new Error('sin API'); await fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(datos)}); }
-document.querySelectorAll('.rama button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.rama button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b);});
-  const esProf=b.dataset.rama==='prof';
+function actualizarCamposSegunRama(){
+  const seleccionado=document.querySelector('input[name="tipoAyuda"]:checked');
+  const esProf=seleccionado?seleccionado.value==='prof':true;
   document.querySelectorAll('[data-solo="prof"]').forEach(c=>c.style.display=esProf?'block':'none');
   document.querySelectorAll('[data-solo="gral"]').forEach(c=>c.style.display=esProf?'none':'block');
-}));
+}
+// Tres disparadores distintos para el mismo resultado: sin importar cuál evento
+// dispare de forma confiable en el dispositivo, el formulario siempre se actualiza.
+document.querySelectorAll('input[name="tipoAyuda"]').forEach(radio=>{
+  radio.addEventListener('change',actualizarCamposSegunRama);
+  radio.addEventListener('input',actualizarCamposSegunRama);
+});
+document.querySelectorAll('.rama label').forEach(lbl=>{
+  lbl.addEventListener('click',()=>setTimeout(actualizarCamposSegunRama,0));
+});
+actualizarCamposSegunRama(); // estado inicial correcto al cargar
 const vv=id=>document.getElementById(id)?.value.trim()||'';
 document.getElementById('btn-enviar').addEventListener('click',async()=>{
   const err=document.getElementById('err-persona'); err.classList.remove('on');
-  const esProf=document.querySelector('.rama button.on').dataset.rama==='prof';
+  const esProf=document.querySelector('input[name="tipoAyuda"]:checked')?.value==='prof';
   if(!vv('f-nombre')||!vv('f-contacto')||(esProf&&(!vv('f-cedula')||!vv('f-prof')))||(!esProf&&!vv('f-tipo'))){err.textContent='Completa los campos con *.';err.classList.add('on');return;}
   if(!document.getElementById('f-consent').checked){err.textContent='Necesitamos tu autorización (Ley 1581) para publicar tu contacto.';err.classList.add('on');return;}
   const btn=document.getElementById('btn-enviar');btn.disabled=true;btn.textContent='Enviando…';
@@ -1171,6 +1237,19 @@ document.getElementById('btn-enviar').addEventListener('click',async()=>{
     document.getElementById('form-persona').style.display='none'; document.querySelector('#rform .rama').style.display='none';
     document.getElementById('conf').classList.add('on'); document.getElementById('conf').scrollIntoView({behavior:'smooth'});
   }catch(e){err.textContent='No pudimos enviar. Intenta de nuevo.';err.classList.add('on');btn.disabled=false;btn.textContent='Enviar mi ofrecimiento';}
+});
+document.getElementById('btn-org')?.addEventListener('click',async()=>{
+  const err=document.getElementById('err-punto'); err.classList.remove('on');
+  if(!vv('o-nombre')||!vv('o-dir')||!vv('o-contacto')||!vv('o-si')||!vv('o-no')){
+    err.textContent='Por favor completa los campos marcados con *.'; err.classList.add('on'); return;
+  }
+  const btn=document.getElementById('btn-org'); btn.disabled=true; btn.textContent='Enviando…';
+  try{
+    await enviarSheet({tipo:'punto', nombre:vv('o-nombre'), direccion:vv('o-dir'), contacto:vv('o-contacto'), necesitan:vv('o-si'), yaNo:vv('o-no'), perfiles:vv('o-prof')});
+    document.getElementById('form-punto').style.display='none';
+    document.getElementById('conf-org').classList.add('on');
+    document.getElementById('conf-org').scrollIntoView({behavior:'smooth'});
+  }catch(e){ err.classList.add('on'); btn.disabled=false; btn.textContent='Enviar reporte'; }
 });
 document.querySelectorAll('[data-copia]').forEach(b=>b.addEventListener('click',()=>{
   navigator.clipboard&&navigator.clipboard.writeText(b.dataset.copia);
