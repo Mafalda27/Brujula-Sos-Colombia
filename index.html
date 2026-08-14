@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brújula Colombia — Ayuda verificada tras el terremoto</title>
-<meta name="description" content="Información verificada para damnificados del terremoto del 10 de agosto en Colombia: registro, subsidios, donaciones seguras, voluntarios verificados y estado de zonas.">
+<title>Brújula Colombia — Mapa de ayuda e información verificada</title>
+<meta name="description" content="Mapa colaborativo en vivo de necesidades y ayuda tras el terremoto del 10 de agosto en Colombia, más información verificada: registro, subsidios, donaciones seguras y voluntarios.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
 :root{
   --azul:#14304F; --azul-med:#2C5788; --azul-bruma:#EDF3FA;
@@ -23,50 +24,53 @@
 html{font-size:17px;}
 body{font-family:'Atkinson Hyperlegible',-apple-system,Arial,sans-serif; background:#E9ECEF; color:var(--tinta); line-height:1.6; display:flex; justify-content:center; padding:0;}
 h1,h2,h3,h4{font-family:'Bricolage Grotesque','Atkinson Hyperlegible',sans-serif; letter-spacing:-.01em;}
-.app{width:100%; max-width:414px; background:var(--fondo); position:relative; padding-bottom:96px; min-height:100vh;}
+.app{width:100%; max-width:460px; background:var(--fondo); position:relative; padding-bottom:96px; min-height:100vh;}
 button{font-family:inherit; cursor:pointer;}
 :focus-visible{outline:3px solid var(--ambar); outline-offset:2px; border-radius:6px;}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important; animation:none!important;} }
 
-header{background:linear-gradient(160deg,#14304F 0%,#1D4064 70%,#2C5788 100%); color:#fff; padding:20px 20px 18px; border-radius:0 0 24px 24px;}
+header{background:linear-gradient(160deg,#14304F 0%,#1D4064 70%,#2C5788 100%); color:#fff; padding:18px 20px 16px; border-radius:0 0 24px 24px;}
 .brand{display:flex; align-items:center; gap:12px;}
 .logo{width:44px; height:44px; border-radius:14px; background:rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; border:1px solid rgba(255,255,255,.25);}
-.brand h1{font-size:1.3rem; font-weight:700;}
-.brand small{display:block; font-family:'Atkinson Hyperlegible'; font-weight:400; font-size:.8rem; opacity:.8;}
-.updated{margin-top:12px; font-size:.8rem; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:5px 14px; display:inline-flex; align-items:center; gap:6px;}
+.brand h1{font-size:1.25rem; font-weight:700;}
+.brand small{display:block; font-family:'Atkinson Hyperlegible'; font-weight:400; font-size:.78rem; opacity:.82;}
+.updated{margin-top:10px; font-size:.78rem; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:5px 13px; display:inline-flex; align-items:center; gap:6px;}
 .dot{width:8px; height:8px; border-radius:50%; background:#7FD8A6; display:inline-block;}
+.dot.amber{background:#FFC24B;}
 
-nav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:414px; z-index:50;
-  display:flex; background:rgba(255,255,255,.97); backdrop-filter:blur(12px);
+nav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:460px; z-index:1200;
+  display:flex; align-items:flex-end; background:rgba(255,255,255,.97); backdrop-filter:blur(12px);
   border-top:1px solid var(--linea); box-shadow:0 -4px 16px rgba(20,48,79,.08);
   padding:6px 4px calc(10px + env(safe-area-inset-bottom));}
-nav button{flex:1; min-height:54px; background:none; border:none; border-radius:14px; font-size:.66rem; font-weight:700; color:var(--gris); line-height:1.25; padding:6px 2px;}
-nav button .ico{display:block; font-size:1.25rem; margin-bottom:2px;}
+nav button{flex:1; min-height:54px; background:none; border:none; border-radius:14px; font-size:.64rem; font-weight:700; color:var(--gris); line-height:1.2; padding:6px 2px;}
+nav button .ico{display:block; font-size:1.2rem; margin-bottom:2px;}
 nav button.active{color:var(--azul); background:var(--azul-bruma);}
+/* Tab central destacado: el mapa */
+nav button.mapa-tab{flex:1.25; color:#fff; background:var(--azul); border-radius:18px; margin:0 4px; min-height:62px; box-shadow:0 4px 14px rgba(20,48,79,.3); transform:translateY(-8px);}
+nav button.mapa-tab .ico{font-size:1.4rem;}
+nav button.mapa-tab.active{background:var(--azul-med); color:#fff;}
 
-section{display:none; padding-bottom:24px;}
+section{display:none;}
 section.visible{display:block; animation:fade .28s ease;}
 @keyframes fade{from{opacity:0; transform:translateY(6px);} to{opacity:1;}}
 
-.h-section{font-size:1.35rem; color:var(--azul); margin:22px 18px 4px;}
+.h-section{font-size:1.3rem; color:var(--azul); margin:20px 18px 4px;}
 .sub{color:var(--gris); font-size:.92rem; margin:0 18px 12px;}
 .card{background:var(--blanco); border:1px solid var(--linea); border-radius:var(--r); margin:12px 18px; padding:18px; box-shadow:var(--sombra);}
 .btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; min-height:52px; border-radius:14px; border:none; font-size:1rem; font-weight:700; padding:13px; text-decoration:none;}
 .btn-primario{background:var(--azul); color:#fff; box-shadow:0 4px 14px rgba(20,48,79,.25);}
 .btn-primario:disabled{opacity:.55; box-shadow:none;}
 .btn-suave{background:var(--azul-bruma); color:var(--azul); min-height:48px; font-size:.95rem;}
+.btn-verde{background:var(--verde); color:#fff;}
 .btn-copiar{background:var(--azul-bruma); color:var(--azul); border:1.5px dashed var(--azul-med); min-height:48px; font-size:.95rem; border-radius:12px;}
-
 .ext{display:flex; align-items:center; gap:12px; width:100%; background:var(--blanco); border:1.5px solid var(--azul-med); border-radius:14px; padding:12px 14px; margin:10px 0; text-decoration:none; color:var(--azul); min-height:56px;}
 .ext .ext-txt{flex:1; text-align:left;}
 .ext b{display:block; font-size:.95rem;}
 .ext span{display:block; font-size:.78rem; color:var(--gris); font-weight:400;}
 .ext .flecha-ext{font-size:1.1rem; flex-shrink:0; color:var(--azul-med);}
-
 .ayuda{border:none; background:var(--azul-bruma); color:var(--azul); border-radius:18px; padding:7px 14px; font-size:.85rem; font-weight:700; min-height:38px;}
 .ayuda-texto{display:none; background:var(--azul-bruma); border-radius:12px; padding:12px 14px; font-size:.9rem; margin-top:8px;}
 .ayuda-texto.abierta{display:block;}
-
 .badge-v{display:inline-flex; align-items:center; gap:5px; background:var(--verde-luz); color:var(--verde); border-radius:20px; padding:4px 12px; font-size:.75rem; font-weight:700;}
 .badge-c{display:inline-flex; align-items:center; gap:5px; background:var(--fondo); color:var(--gris); border:1.5px dashed #B8C4CF; border-radius:20px; padding:4px 12px; font-size:.75rem; font-weight:700;}
 .pill{display:inline-block; background:var(--fondo); border:1px solid var(--linea); border-radius:14px; padding:3px 11px; font-size:.78rem; color:var(--gris); margin:2px 5px 2px 0;}
@@ -74,35 +78,106 @@ section.visible{display:block; animation:fade .28s ease;}
 .pill-cupo{background:var(--verde-luz); color:var(--verde); border:1px solid var(--verde); font-weight:700;}
 .pill-lleno{background:var(--ambar-luz); color:var(--ambar); border:1px solid var(--ambar); font-weight:700;}
 
-.franja{background:var(--rojo-luz); margin:14px 18px 4px; border-radius:var(--r); padding:14px;}
-.franja p{font-size:.85rem; font-weight:700; color:var(--rojo); margin-bottom:10px;}
-.franja-chips{display:flex; gap:10px; overflow-x:auto; padding-bottom:2px;}
-.chip-e{flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:100px; min-height:64px; background:#fff; border:none; box-shadow:0 2px 8px rgba(163,34,34,.15); border-radius:14px; padding:8px 12px; text-decoration:none; color:var(--rojo);}
-.chip-e b{font-size:1.15rem; font-family:'Bricolage Grotesque';}
-.chip-e span{font-size:.72rem; font-weight:700; text-align:center;}
-.intro{margin:16px 18px 4px; font-size:1rem;}
-.intro b{color:var(--azul);}
-.ruta{display:flex; gap:14px; align-items:center; background:var(--blanco); border:1px solid var(--linea); border-radius:var(--r); margin:12px 18px; padding:16px 18px; text-align:left; width:calc(100% - 36px); box-shadow:var(--sombra); border-left:5px solid var(--azul-med);}
-.ruta .ico-g{width:50px; height:50px; border-radius:16px; background:var(--azul-bruma); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;}
-.ruta h2{font-size:1.1rem; color:var(--azul);}
-.ruta p{font-size:.87rem; color:var(--gris); margin-top:2px; font-family:'Atkinson Hyperlegible';}
-.ruta .flecha{margin-left:auto; color:var(--azul-med); font-size:1.4rem; flex-shrink:0;}
+/* ══════ MAPA (protagonista) ══════ */
+.mapa-top{padding:14px 18px 0;}
+.mapa-top h2{font-size:1.35rem; color:var(--azul);}
+.mapa-top p{font-size:.9rem; color:var(--gris); margin-top:2px;}
+.estado-con{display:inline-flex; align-items:center; gap:6px; font-size:.75rem; font-weight:700; border-radius:20px; padding:4px 12px; margin-top:10px; background:var(--ambar-luz); color:var(--ambar);}
+.estado-con.live{background:var(--verde-luz); color:var(--verde);}
+.buscador-wrap{display:flex; gap:8px; margin:12px 18px;}
+.buscador-wrap input{flex:1; min-height:50px; border:1.5px solid var(--linea); border-radius:14px; padding:12px 14px; font-size:.95rem; font-family:'Atkinson Hyperlegible'; background:var(--blanco);}
+.buscador-wrap input:focus{border-color:var(--azul-med); outline:none; box-shadow:0 0 0 3px var(--azul-bruma);}
+.buscador-wrap button{min-width:54px; border:none; border-radius:14px; background:var(--azul); color:#fff; font-size:1.2rem;}
+.tip-mapa{margin:0 18px 10px; background:var(--azul-bruma); border-radius:12px; padding:10px 14px; font-size:.85rem; color:var(--azul); display:flex; gap:8px; align-items:center;}
+#mapa{height:60vh; min-height:360px; width:calc(100% - 36px); margin:0 18px; border-radius:var(--r); border:1px solid var(--linea); z-index:1; box-shadow:var(--sombra);}
+.custom-pin{display:flex; align-items:center; justify-content:center;}
+.leyenda-mapa{display:flex; flex-wrap:wrap; gap:10px; margin:12px 18px; font-size:.82rem; font-weight:700;}
+.leyenda-mapa span{display:inline-flex; align-items:center; gap:5px;}
+.acciones-mapa{display:flex; gap:10px; margin:8px 18px 4px;}
+.acciones-mapa button{flex:1; min-height:52px; border-radius:14px; border:none; font-size:.95rem; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;}
+.btn-publicar{background:var(--azul); color:#fff; box-shadow:0 4px 14px rgba(20,48,79,.25);}
+.btn-gps{background:var(--blanco); color:var(--azul); border:2px solid var(--azul-med)!important;}
+.btn-gps.on{background:var(--verde-luz); color:var(--verde); border-color:var(--verde)!important;}
 
+/* filtros */
+.filtros{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:12px 18px;}
+.filtros label{font-size:.75rem; font-weight:700; color:var(--gris); display:block; margin-bottom:4px;}
+.filtros select{width:100%; min-height:46px; border:1.5px solid var(--linea); border-radius:12px; padding:8px 10px; font-size:.85rem; font-family:'Atkinson Hyperlegible'; background:var(--blanco);}
+.filtros .full{grid-column:1 / -1;}
+
+/* tarjetas del mapa */
+.tarjetas-mapa{margin:8px 0 0;}
+.tm-card{background:var(--blanco); border:1px solid var(--linea); border-left-width:5px; border-radius:var(--r); margin:12px 18px; padding:16px; box-shadow:var(--sombra);}
+.tm-card.necesita{border-left-color:var(--rojo);}
+.tm-card.ofrece{border-left-color:var(--verde);}
+.tm-card.atendido{border-left-color:#9AA7B2; background:#F4F6F8;}
+.tm-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:8px;}
+.tm-tag{font-size:.7rem; font-weight:700; padding:3px 9px; border-radius:10px;}
+.tm-tag.necesita{background:var(--rojo-luz); color:var(--rojo);}
+.tm-tag.ofrece{background:var(--verde-luz); color:var(--verde);}
+.tm-estado{font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:10px; white-space:nowrap;}
+.tm-estado.val{background:var(--verde-luz); color:var(--verde);}
+.tm-estado.pend{background:var(--ambar-luz); color:var(--ambar);}
+.tm-card h4{font-size:1.05rem; margin:2px 0;}
+.tm-desc{font-size:.9rem; color:var(--tinta); margin:6px 0;}
+.tm-img{width:100%; height:140px; object-fit:cover; border-radius:12px; margin:8px 0; border:1px solid var(--linea); cursor:pointer;}
+.tm-tipos{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
+.tm-tipo{font-size:.75rem; font-weight:700; padding:4px 9px; border-radius:10px; background:var(--rojo-luz); color:var(--rojo);}
+.tm-tipo.off{background:#EFF2F5; color:var(--gris); text-decoration:line-through;}
+.tm-otro{background:var(--ambar-luz); border-radius:10px; padding:8px 12px; font-size:.82rem; color:var(--ambar); margin:8px 0;}
+.tm-acciones{border-top:1px solid var(--linea); margin-top:10px; padding-top:10px; display:flex; flex-direction:column; gap:8px;}
+.tm-fila{display:flex; justify-content:space-between; align-items:center; font-size:.85rem;}
+.tm-wa{color:var(--verde); font-weight:700; text-decoration:none;}
+.tm-vermapa{color:var(--azul); font-weight:700; background:none; border:none; font-size:.85rem;}
+.btn-validar{width:100%; min-height:46px; border-radius:12px; border:none; font-size:.85rem; font-weight:700; background:var(--ambar); color:#fff;}
+.btn-validar:disabled{background:var(--verde-luz); color:var(--verde);}
+.tm-mini{display:flex; justify-content:space-between; align-items:center; font-size:.75rem; color:var(--gris); font-weight:700;}
+.tm-mini button{background:none; border:none; color:var(--gris); font-weight:700; font-size:.75rem;}
+.dist-badge{font-size:.72rem; font-weight:700; color:var(--azul-med); background:var(--azul-bruma); padding:2px 8px; border-radius:8px;}
+
+/* modales */
+.modal{display:none; position:fixed; inset:0; background:rgba(20,48,79,.55); backdrop-filter:blur(4px); z-index:2000; justify-content:center; align-items:flex-start; padding:20px 12px; overflow-y:auto;}
+.modal.on{display:flex;}
+.modal-box{background:var(--blanco); border-radius:20px; max-width:440px; width:100%; padding:22px; box-shadow:0 20px 60px rgba(0,0,0,.3); position:relative; margin:auto;}
+.modal-box h3{font-size:1.2rem; color:var(--azul); margin-bottom:4px;}
+.modal-cerrar{position:absolute; top:14px; right:16px; background:none; border:none; font-size:1.6rem; color:var(--gris); line-height:1;}
+.campo{margin:12px 0;}
+.campo label{display:block; font-weight:700; font-size:.9rem; margin-bottom:6px;}
+.campo input,.campo select,.campo textarea{width:100%; min-height:50px; border:1.5px solid var(--linea); border-radius:12px; padding:12px 14px; font-size:1rem; font-family:'Atkinson Hyperlegible'; background:var(--blanco); color:var(--tinta);}
+.campo textarea{min-height:80px; resize:vertical;}
+.campo :is(input,select,textarea):focus{border-color:var(--azul-med); outline:none; box-shadow:0 0 0 3px var(--azul-bruma);}
+.campo .apoyo{font-size:.8rem; color:var(--gris); margin-top:5px;}
+.radio-modo{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.radio-modo label{display:flex; align-items:center; gap:8px; border:1.5px solid var(--linea); border-radius:12px; padding:12px; font-weight:700; font-size:.82rem; cursor:pointer;}
+.radio-modo label.nec{background:var(--rojo-luz); border-color:var(--rojo); color:var(--rojo);}
+.radio-modo label.ofr{background:var(--verde-luz); border-color:var(--verde); color:var(--verde);}
+.chk-lista{background:var(--fondo); border:1px solid var(--linea); border-radius:12px; padding:12px; font-size:.85rem;}
+.chk-lista label{display:flex; align-items:center; gap:8px; padding:5px 0;}
+.chk-lista input{width:20px; height:20px; accent-color:var(--azul);}
+.coords{display:grid; grid-template-columns:1fr 1fr; gap:8px; background:var(--fondo); border-radius:12px; padding:10px;}
+.coords input{background:#fff; font-family:monospace; font-size:.8rem; min-height:40px;}
+.preview-wrap{position:relative; margin-top:8px;}
+.preview-wrap img{width:100%; height:130px; object-fit:cover; border-radius:12px;}
+.preview-wrap button{position:absolute; top:6px; right:6px; background:var(--rojo); color:#fff; border:none; border-radius:50%; width:28px; height:28px; font-weight:700;}
+#modalImagenFull{display:none; position:fixed; inset:0; background:rgba(10,15,20,.9); z-index:3000; justify-content:center; align-items:center; padding:20px;}
+#modalImagenFull.on{display:flex;}
+#modalImagenFull img{max-width:100%; max-height:85vh; object-fit:contain; border-radius:12px;}
+
+/* acordeones y demás (guía) */
 details.paso{background:var(--blanco); border:1px solid var(--linea); border-radius:var(--r); margin:10px 18px; overflow:hidden; box-shadow:var(--sombra);}
 details.paso summary{list-style:none; padding:16px 18px; display:flex; align-items:center; gap:14px; font-weight:700; font-size:1rem; color:var(--azul); min-height:58px; cursor:pointer; font-family:'Bricolage Grotesque';}
 details.paso summary::-webkit-details-marker{display:none;}
 details.paso summary .num{width:36px; height:36px; border-radius:12px; background:var(--azul-bruma); color:var(--azul); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0;}
 details.paso[open] summary .num{background:var(--azul); color:#fff;}
-details.paso summary .mas{margin-left:auto; font-size:1.5rem; color:var(--gris); font-weight:400; transition:transform .2s;}
+details.paso summary .mas{margin-left:auto; font-size:1.5rem; color:var(--gris); font-weight:400;}
 details.paso[open] summary .mas{transform:rotate(45deg);}
-.paso-body{padding:0 18px 18px; border-top:1px solid var(--linea); font-family:'Atkinson Hyperlegible';}
+.paso-body{padding:0 18px 18px; border-top:1px solid var(--linea);}
 .paso-body ol{padding-left:22px; margin:12px 0;}
 .paso-body li{margin-bottom:10px; font-size:.95rem;}
 .paso-body p{font-size:.95rem; margin:10px 0;}
 .aviso{display:flex; gap:10px; background:var(--ambar-luz); border-radius:12px; padding:12px 14px; font-size:.9rem; margin:12px 0;}
 .aviso b{color:var(--ambar);}
 .fuente{font-size:.8rem; color:var(--gris); border-top:1px solid var(--linea); padding-top:10px; margin-top:10px;}
-
 .segs{display:flex; gap:6px; margin:16px 18px; background:#EAEFF4; border-radius:18px; padding:5px;}
 .segs button{flex:1; min-height:46px; border-radius:14px; border:none; background:transparent; font-size:.8rem; font-weight:700; color:var(--gris); padding:6px 4px; line-height:1.2;}
 .segs button.on{background:var(--blanco); color:var(--azul); box-shadow:0 2px 8px rgba(20,48,79,.12);}
@@ -110,7 +185,6 @@ details.paso[open] summary .mas{transform:rotate(45deg);}
 .subpane.on{display:block;}
 .dato-copiable{background:var(--fondo); border:1px solid var(--linea); border-radius:12px; padding:12px 14px; font-size:.92rem; margin:10px 0; word-break:break-word;}
 .dato-copiable b{color:var(--azul);}
-
 .tags-si-no{margin:8px 18px; display:flex; flex-wrap:wrap; gap:8px;}
 .t-si{background:var(--verde-luz); color:var(--verde); border-radius:18px; padding:8px 14px; font-size:.88rem; font-weight:700;}
 .t-no{background:#EFF2F5; color:var(--gris); border-radius:18px; padding:8px 14px; font-size:.88rem; text-decoration:line-through;}
@@ -118,7 +192,6 @@ details.paso[open] summary .mas{transform:rotate(45deg);}
 .leyenda span::before{content:"●"; margin-right:5px;}
 .leyenda .l-si::before{color:var(--verde);}
 .leyenda .l-no::before{color:#C3CDD6;}
-
 .divisor-nivel{margin:22px 18px 4px; font-size:1rem; font-weight:700; color:var(--azul); display:flex; align-items:center; gap:10px; font-family:'Bricolage Grotesque';}
 .divisor-nivel::after{content:""; flex:1; height:1px; background:var(--linea);}
 .persona{background:var(--blanco); border:1px solid var(--linea); border-radius:var(--r); margin:12px 18px; padding:18px; box-shadow:var(--sombra);}
@@ -129,46 +202,34 @@ details.paso[open] summary .mas{transform:rotate(45deg);}
 .persona .desc{font-size:.92rem; margin:8px 0;}
 .horarios{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
 .horarios span{background:var(--verde-luz); color:var(--verde); border-radius:10px; padding:5px 10px; font-size:.8rem; font-weight:700;}
-
 .feed-item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--linea); font-size:.92rem;}
 .feed-item:last-of-type{border-bottom:none;}
 .feed-hora{flex-shrink:0; background:var(--azul-bruma); color:var(--azul); border-radius:10px; padding:4px 9px; font-size:.75rem; font-weight:700; height:fit-content; white-space:nowrap;}
 .feed-item .ftag{display:inline-block; font-size:.72rem; color:var(--gris); margin-top:3px;}
 .volver{display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--azul-med); font-weight:700; font-size:.95rem; margin:16px 18px 0; min-height:44px;}
-
-.ciudades{display:flex; gap:8px; overflow-x:auto; padding:4px 18px 8px;}
-.ciudades button{flex-shrink:0; min-height:44px; border-radius:22px; border:1.5px solid var(--linea); background:var(--blanco); padding:8px 16px; font-size:.88rem; font-weight:700; color:var(--gris);}
-.ciudades button.on{background:var(--azul); border-color:var(--azul); color:#fff;}
-.zona-lista{margin:10px 18px;}
-.zona-fila{display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border:1px solid var(--linea); border-radius:14px; background:var(--blanco); margin-bottom:10px; box-shadow:var(--sombra);}
-.sem{flex-shrink:0; font-size:1.1rem; line-height:1.4;}
-.zona-fila b{font-size:.95rem;}
-.zona-fila p{font-size:.88rem; color:var(--gris);}
-.zona-fila .ftag{font-size:.75rem; color:var(--gris); display:block; margin-top:3px;}
-.estado-rojo{color:var(--rojo); font-weight:700; font-size:.8rem;}
-.estado-ambar{color:var(--ambar); font-weight:700; font-size:.8rem;}
-.estado-verde{color:var(--verde); font-weight:700; font-size:.8rem;}
-
-.campo{margin:14px 18px;}
-.campo label{display:block; font-weight:700; font-size:.95rem; margin-bottom:6px;}
-.campo input,.campo select,.campo textarea{width:100%; min-height:52px; border:1.5px solid var(--linea); border-radius:14px; padding:13px 14px; font-size:1rem; font-family:'Atkinson Hyperlegible'; background:var(--blanco); color:var(--tinta);}
-.campo textarea{min-height:90px; resize:vertical;}
-.campo :is(input,select,textarea):focus{border-color:var(--azul-med); outline:none; box-shadow:0 0 0 3px var(--azul-bruma);}
-.campo .apoyo{font-size:.83rem; color:var(--gris); margin-top:6px;}
+.franja{background:var(--rojo-luz); margin:14px 18px 4px; border-radius:var(--r); padding:14px;}
+.franja p{font-size:.85rem; font-weight:700; color:var(--rojo); margin-bottom:10px;}
+.franja-chips{display:flex; gap:10px; overflow-x:auto; padding-bottom:2px;}
+.chip-e{flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:100px; min-height:64px; background:#fff; border:none; box-shadow:0 2px 8px rgba(163,34,34,.15); border-radius:14px; padding:8px 12px; text-decoration:none; color:var(--rojo);}
+.chip-e b{font-size:1.15rem; font-family:'Bricolage Grotesque';}
+.chip-e span{font-size:.72rem; font-weight:700; text-align:center;}
+.ruta{display:flex; gap:14px; align-items:center; background:var(--blanco); border:1px solid var(--linea); border-radius:var(--r); margin:12px 18px; padding:16px 18px; text-align:left; width:calc(100% - 36px); box-shadow:var(--sombra); border-left:5px solid var(--azul-med);}
+.ruta .ico-g{width:50px; height:50px; border-radius:16px; background:var(--azul-bruma); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;}
+.ruta h2{font-size:1.08rem; color:var(--azul);}
+.ruta p{font-size:.87rem; color:var(--gris); margin-top:2px; font-family:'Atkinson Hyperlegible';}
+.ruta .flecha{margin-left:auto; color:var(--azul-med); font-size:1.4rem; flex-shrink:0;}
+.confirmacion{display:none; background:var(--verde-luz); border-radius:var(--r); margin:16px 18px; padding:22px; text-align:center;}
+.confirmacion.on{display:block;}
+.confirmacion .check{font-size:2.2rem;}
+.confirmacion h3{color:var(--verde); margin:8px 0;}
+.error-envio{display:none; background:var(--rojo-luz); border-radius:14px; margin:12px 18px; padding:14px; font-size:.9rem; color:var(--rojo);}
+.error-envio.on{display:block;}
 .rama{display:flex; gap:10px; margin:12px 18px;}
 .rama button{flex:1; min-height:76px; border-radius:16px; border:1.5px solid var(--linea); background:var(--blanco); font-size:.9rem; font-weight:700; color:var(--gris); padding:12px; line-height:1.3;}
 .rama button.on{border-color:var(--azul); color:var(--azul); background:var(--azul-bruma);}
 .consent{display:flex; gap:12px; align-items:flex-start; margin:14px 18px; font-size:.9rem; background:var(--blanco); border:1px solid var(--linea); border-radius:14px; padding:14px;}
 .consent input{width:26px; height:26px; margin-top:2px; flex-shrink:0; accent-color:var(--azul);}
-.confirmacion{display:none; background:var(--verde-luz); border-radius:var(--r); margin:16px 18px; padding:22px; text-align:center;}
-.confirmacion.on{display:block;}
-.confirmacion .check{font-size:2.2rem;}
-.confirmacion h3{color:var(--verde); margin:8px 0;}
-.confirmacion p{font-size:.92rem;}
-.error-envio{display:none; background:var(--rojo-luz); border-radius:14px; margin:12px 18px; padding:14px; font-size:.9rem; color:var(--rojo);}
-.error-envio.on{display:block;}
 .wrap{padding:0 18px;}
-
 footer{background:var(--azul); color:#D9E4F0; padding:20px 18px 26px; font-size:.82rem; line-height:1.65; margin-top:20px;}
 footer b{color:#FFD9A8;}
 .skip{position:absolute; left:-9999px;}
@@ -182,15 +243,80 @@ footer b{color:#FFD9A8;}
 <header>
   <div class="brand">
     <div class="logo" aria-hidden="true">🧭</div>
-    <h1>Brújula Colombia<small>Ayuda verificada tras el terremoto</small></h1>
+    <h1>Brújula Colombia<small>Mapa de ayuda e información verificada</small></h1>
   </div>
-  <span class="updated"><span class="dot" aria-hidden="true"></span> <span id="fecha-actualizacion">Información revisada: 13 de agosto</span></span>
+  <span class="updated"><span class="dot" id="dot-estado" aria-hidden="true"></span> <span id="fecha-actualizacion">Información revisada: 13 de agosto</span></span>
 </header>
 
 <main id="contenido">
 
-<!-- INICIO -->
-<section id="home" class="visible" aria-label="Inicio">
+<!-- ════════════ MAPA (protagonista) ════════════ -->
+<section id="mapa-sec" class="visible" aria-label="Mapa de ayuda en vivo">
+  <div class="mapa-top">
+    <h2>Mapa de ayuda en vivo</h2>
+    <p>Cada punto es una necesidad o una oferta de ayuda, puesta por la comunidad y validada en terreno.</p>
+    <span class="estado-con" id="estadoConexion">🟡 Conectando…</span>
+  </div>
+  <div class="buscador-wrap">
+    <input type="text" id="buscadorPrincipal" list="sugerenciasPrincipal" placeholder="🔍 Busca un municipio o dirección…" onkeypress="if(event.key==='Enter')buscarMunicipioPrincipal()">
+    <datalist id="sugerenciasPrincipal"></datalist>
+    <button onclick="buscarMunicipioPrincipal()" aria-label="Buscar">🔎</button>
+  </div>
+  <div class="tip-mapa"><span aria-hidden="true">💡</span><span>Haz <b>doble toque</b> sobre el mapa para poner un punto y publicar ayuda.</span></div>
+  <div id="mapa"></div>
+  <div class="leyenda-mapa">
+    <span style="color:var(--rojo);">🔴 Necesidad</span>
+    <span style="color:var(--verde);">🟢 Oferta</span>
+    <span style="color:var(--gris);">⚪ Atendido</span>
+    <span style="color:var(--verde);">✅ Validado (3/3)</span>
+  </div>
+  <div class="acciones-mapa">
+    <button class="btn-publicar" onclick="abrirFormularioNueva()">➕ Publicar ayuda</button>
+    <button class="btn-gps" id="btnGPS" onclick="obtenerUbicacionUsuario()">📡 Mi ubicación</button>
+  </div>
+
+  <div class="filtros">
+    <div>
+      <label for="filtroCategoria">Categoría</label>
+      <select id="filtroCategoria" onchange="aplicarFiltrosYOrden()">
+        <option value="todos">Todas</option>
+        <option value="🥣 Alimentos y Agua Potable">🥣 Alimentos y Agua</option>
+        <option value="💊 Insumos Médicos y Salud">💊 Insumos Médicos</option>
+        <option value="🙋‍♂️ Trabajo Voluntario / Mano de Obra">🙋‍♂️ Voluntariado</option>
+        <option value="⛺ Albergue, Carpas y Colchonetas">⛺ Albergue</option>
+        <option value="🚜 Herramientas y Remoción">🚜 Herramientas</option>
+        <option value="💡 Otro (Donaciones, Apoyo, etc.)">💡 Otro</option>
+      </select>
+    </div>
+    <div>
+      <label for="filtroModalidad">Tipo</label>
+      <select id="filtroModalidad" onchange="aplicarFiltrosYOrden()">
+        <option value="todos">Todo</option>
+        <option value="necesita">🔴 Necesidades</option>
+        <option value="ofrece">🟢 Ofertas</option>
+      </select>
+    </div>
+    <div class="full">
+      <label for="ordenamiento">Ordenar por</label>
+      <select id="ordenamiento" onchange="aplicarFiltrosYOrden()">
+        <option value="recientes">🕒 Más recientes</option>
+        <option value="urgentes">🚨 Más urgentes</option>
+        <option value="cercanos">📍 Más cercanos a mí</option>
+      </select>
+    </div>
+  </div>
+
+  <h3 class="h-section" style="font-size:1.1rem;">Publicaciones</h3>
+  <div class="tarjetas-mapa" id="contenedorTarjetas"></div>
+
+  <div class="card" style="background:var(--azul-bruma); border:none;">
+    <p style="font-size:.88rem;"><b style="color:var(--azul);">¿Cómo funciona la validación?</b><br>
+    Para validar o reportar un punto, debes estar físicamente a menos de 50 metros del lugar: el sistema verifica tu GPS. Cuando 3 personas validan en terreno, el punto queda ✅. Con 3 reportes de falso, se oculta. Así la comunidad mantiene la información limpia.</p>
+  </div>
+</section>
+
+<!-- ════════════ INICIO / GUÍA ════════════ -->
+<section id="home" aria-label="Inicio e información verificada">
   <div class="franja" role="region" aria-label="Líneas de emergencia">
     <p>¿Es una emergencia? Llama ahora, la llamada es gratis:</p>
     <div class="franja-chips">
@@ -215,7 +341,7 @@ footer b{color:#FFD9A8;}
     <span class="flecha" aria-hidden="true">›</span>
   </button>
 
-  <p class="intro">Aquí encuentras en un solo lugar <b>información revisada y confirmada</b> para las personas afectadas por el terremoto del 10 de agosto, y para quienes quieren ayudar.</p>
+  <p class="sub" style="margin-top:16px;">Además del mapa, aquí tienes <b>información verificada</b> con fuentes oficiales:</p>
 
   <button class="ruta" data-go="r1">
     <span class="ico-g" aria-hidden="true">🤝</span>
@@ -224,7 +350,7 @@ footer b{color:#FFD9A8;}
   </button>
   <button class="ruta" data-go="r2">
     <span class="ico-g" aria-hidden="true">💛</span>
-    <span><h2>Quiero ayudar</h2><p>Dona seguro, mira qué se necesita hoy y encuentra voluntarios.</p></span>
+    <span><h2>Donar seguro y voluntarios</h2><p>Cuentas verificadas, qué se necesita hoy y personas que ayudan.</p></span>
     <span class="flecha" aria-hidden="true">›</span>
   </button>
   <button class="ruta" data-go="rform">
@@ -232,151 +358,78 @@ footer b{color:#FFD9A8;}
     <span><h2>Ofrezco mi ayuda</h2><p>Psicólogos y profes por internet, ingenieros, transporte y más.</p></span>
     <span class="flecha" aria-hidden="true">›</span>
   </button>
-  <button class="ruta" data-go="r3">
-    <span class="ico-g" aria-hidden="true">📦</span>
-    <span><h2>Soy un albergue o punto de ayuda</h2><p>Cuéntanos qué necesita tu punto hoy.</p></span>
-    <span class="flecha" aria-hidden="true">›</span>
-  </button>
 
   <div class="card" style="background:var(--azul-bruma); border:none;">
-    <p style="font-size:.92rem;"><b style="color:var(--azul);">¿Qué significa "verificado"?</b><br>
-    Antes de publicar cualquier dato lo confirmamos en los canales oficiales de las entidades o en los registros públicos de cada profesión, y mostramos la fecha de revisión. Cuando algo no lo hemos podido confirmar, no lo publicamos.</p>
+    <p style="font-size:.92rem;"><b style="color:var(--azul);">Dos formas de confianza en un solo lugar</b><br>
+    El <b>mapa</b> lo construye y valida la comunidad en terreno, en tiempo real. La <b>información de esta sección</b> la verificamos nosotros con fuentes oficiales antes de publicarla. Juntas te dan la foto completa.</p>
   </div>
 </section>
 
-<!-- NECESITO AYUDA -->
+<!-- ════════════ NECESITO AYUDA ════════════ -->
 <section id="r1" aria-label="Necesito ayuda">
   <button class="volver">‹ Volver</button>
   <h2 class="h-section">Guía paso a paso</h2>
   <p class="sub">Toca cada tema para ver qué hacer, explicado sin palabras técnicas.</p>
-
   <details class="paso" open>
     <summary><span class="num">1</span>Registrarme como damnificado<span class="mas" aria-hidden="true">+</span></summary>
     <div class="paso-body">
       <p>Registrarte es el <b>primer paso</b> para que el Estado sepa que fuiste afectado y puedas recibir ayudas.</p>
       <button class="ayuda" aria-expanded="false" data-ayuda="ay-rud">¿Qué es el "RUD"? ⓘ</button>
       <div class="ayuda-texto" id="ay-rud">El <b>Registro Único de Damnificados (RUD)</b> es la lista oficial del Gobierno con las personas afectadas. Estar en ella es necesario para acceder a las ayudas, aunque no garantiza que llegue dinero de inmediato.</div>
-      <ol>
-        <li>Ve a tu <b>alcaldía</b> y pregunta por el registro de damnificados.</li>
-        <li>Lleva tu <b>cédula</b> y, si puedes, <b>fotos del daño</b>.</li>
-        <li>Guarda todo papel que te entreguen.</li>
-      </ol>
+      <ol><li>Ve a tu <b>alcaldía</b> y pregunta por el registro de damnificados.</li><li>Lleva tu <b>cédula</b> y, si puedes, <b>fotos del daño</b>.</li><li>Guarda todo papel que te entreguen.</li></ol>
       <div class="aviso"><span aria-hidden="true">⚠️</span><span><b>El registro es gratis.</b> Si alguien te cobra por inscribirte o por "agilizar" una ayuda, es una estafa.</span></div>
-      <a class="ext" href="https://portal.gestiondelriesgo.gov.co" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Página oficial de la UNGRD</b><span>portal.gestiondelriesgo.gov.co</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
+      <a class="ext" href="https://portal.gestiondelriesgo.gov.co" target="_blank" rel="noopener"><span class="ext-txt"><b>Página oficial de la UNGRD</b><span>portal.gestiondelriesgo.gov.co</span></span><span class="flecha-ext" aria-hidden="true">↗</span></a>
       <p class="fuente"><span class="badge-v">✓ Verificado 13 ago</span> · Fuente: UNGRD y alcaldías</p>
     </div>
   </details>
-
-  <details class="paso">
-    <summary><span class="num">2</span>Mi casa quedó dañada<span class="mas" aria-hidden="true">+</span></summary>
+  <details class="paso"><summary><span class="num">2</span>Mi casa quedó dañada<span class="mas" aria-hidden="true">+</span></summary>
     <div class="paso-body">
       <div class="aviso"><span aria-hidden="true">⚠️</span><span><b>No entres a tu casa</b> si tiene grietas o daños, aunque parezca segura. Espera la revisión oficial.</span></div>
-      <ol>
-        <li>Pide la revisión de tu vivienda: la hacen <b>Bomberos, Defensa Civil o Cruz Roja</b>, sin costo.</li>
-        <li>Te entregan un documento llamado <b>acta de habitabilidad</b>.</li>
-        <li><b>Guarda esa acta como oro</b>: la necesitas para pedir el subsidio de arriendo y otras ayudas.</li>
-      </ol>
-      <button class="ayuda" aria-expanded="false" data-ayuda="ay-acta">¿Qué es el "acta de habitabilidad"? ⓘ</button>
-      <div class="ayuda-texto" id="ay-acta">Es el documento oficial donde un experto dice si tu casa se puede habitar o no. Sirve como prueba del daño ante cualquier entidad.</div>
+      <ol><li>Pide la revisión de tu vivienda: la hacen <b>Bomberos, Defensa Civil o Cruz Roja</b>, sin costo.</li><li>Te entregan un documento llamado <b>acta de habitabilidad</b>.</li><li><b>Guarda esa acta como oro</b>: la necesitas para el subsidio de arriendo y otras ayudas.</li></ol>
       <p class="fuente"><span class="badge-v">✓ Verificado 13 ago</span> · Fuente: UNGRD, Cruz Roja</p>
     </div>
   </details>
-
-  <details class="paso">
-    <summary><span class="num">3</span>Subsidios y alivios del Gobierno<span class="mas" aria-hidden="true">+</span></summary>
+  <details class="paso"><summary><span class="num">3</span>Subsidios y alivios del Gobierno<span class="mas" aria-hidden="true">+</span></summary>
     <div class="paso-body">
-      <ol>
-        <li><b>Subsidio de arriendo</b>: para familias cuya casa quedó inhabitable. Necesitas el registro de damnificados <b>y</b> el acta de habitabilidad.</li>
-        <li><b>Servicios públicos</b>: tres meses de alivio en el pago.</li>
-        <li><b>Kits de ayuda</b> (mercado, agua, colchonetas, aseo) vía UNGRD, Cruz Roja y Defensa Civil.</li>
-      </ol>
-      <div class="aviso"><span aria-hidden="true">🕐</span><span>Las ayudas se activan por ciudades. Pregunta en tu alcaldía cuál ya está disponible en la tuya.</span></div>
-      <a class="ext" href="https://portal.gestiondelriesgo.gov.co" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Anuncios oficiales · UNGRD</b><span>portal.gestiondelriesgo.gov.co</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
+      <ol><li><b>Subsidio de arriendo</b>: para familias cuya casa quedó inhabitable. Necesitas el registro <b>y</b> el acta de habitabilidad.</li><li><b>Servicios públicos</b>: tres meses de alivio en el pago.</li><li><b>Kits de ayuda</b> vía UNGRD, Cruz Roja y Defensa Civil.</li></ol>
+      <div class="aviso"><span aria-hidden="true">🕐</span><span>Las ayudas se activan por ciudades. Pregunta en tu alcaldía cuál ya está disponible.</span></div>
       <p class="fuente"><span class="badge-v">✓ Verificado 13 ago</span> · Fuente: Presidencia, UNGRD</p>
     </div>
   </details>
-
-  <details class="paso">
-    <summary><span class="num">4</span>Vivo en arriendo y la casa quedó mal<span class="mas" aria-hidden="true">+</span></summary>
+  <details class="paso" id="acc-desap"><summary><span class="num">4</span>Busco a una persona desaparecida<span class="mas" aria-hidden="true">+</span></summary>
     <div class="paso-body">
-      <ol>
-        <li>Comunícate con el dueño <b>por escrito</b> (WhatsApp sirve) y guarda esos mensajes.</li>
-        <li>Guarda el <b>acta de habitabilidad</b>: es tu prueba de que debiste salir por el daño.</li>
-      </ol>
-      <p class="fuente"><span class="badge-v">✓ Verificado 12 ago</span></p>
-    </div>
-  </details>
-
-  <details class="paso" id="acc-desap">
-    <summary><span class="num">5</span>Busco a una persona desaparecida<span class="mas" aria-hidden="true">+</span></summary>
-    <div class="paso-body">
-      <p><b>Primero, repórtalo a las autoridades</b> (es gratis, toca el número para llamar):</p>
+      <p><b>Primero, repórtalo a las autoridades</b> (es gratis, toca para llamar):</p>
       <div style="display:flex; gap:10px; margin:10px 0;">
         <a class="ext" href="tel:122" style="margin:0;"><span class="ext-txt"><b>📞 122</b><span>Fiscalía</span></span></a>
         <a class="ext" href="tel:123" style="margin:0;"><span class="ext-txt"><b>📞 123</b><span>Policía</span></span></a>
       </div>
-      <p>Después, apóyate en estos canales:</p>
-      <a class="ext" href="https://asocapitales.co/terremoto-colombia.html" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Colombia Te Busca · registrar y buscar</b><span>asocapitales.co</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
-      <a class="ext" href="tel:+573007616647">
-        <span class="ext-txt"><b>📞 Llamar a la línea de Colombia Te Busca</b><span>300 761 6647</span></span></a>
-      <a class="ext" href="https://www.medicinalegal.gov.co" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Medicina Legal · listas y formulario</b><span>medicinalegal.gov.co</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
-      <a class="ext" href="https://wa.me/5712200727" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>💬 Escribir a Radio Nacional por WhatsApp</b><span>+57 1 220 0727</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
-      <p>Si buscas a un <b>niño o niña</b>: el ICBF tiene equipos en las zonas afectadas.</p>
-      <p class="fuente"><span class="badge-v">✓ Verificado 13 ago</span> · Fuente: Fiscalía, Asocapitales, Radio Nacional</p>
+      <a class="ext" href="https://asocapitales.co/terremoto-colombia.html" target="_blank" rel="noopener"><span class="ext-txt"><b>Colombia Te Busca · registrar y buscar</b><span>asocapitales.co</span></span><span class="flecha-ext" aria-hidden="true">↗</span></a>
+      <a class="ext" href="tel:+573007616647"><span class="ext-txt"><b>📞 Línea Colombia Te Busca</b><span>300 761 6647</span></span></a>
+      <p class="fuente"><span class="badge-v">✓ Verificado 13 ago</span></p>
     </div>
   </details>
-
-  <details class="paso" id="acc-psico">
-    <summary><span class="num">6</span>Necesito apoyo emocional<span class="mas" aria-hidden="true">+</span></summary>
+  <details class="paso" id="acc-psico"><summary><span class="num">5</span>Necesito apoyo emocional<span class="mas" aria-hidden="true">+</span></summary>
     <div class="paso-body">
-      <p>Sentir miedo, tristeza o no poder dormir después de un terremoto es <b>normal</b>. Pedir apoyo también lo es.</p>
-      <div class="aviso"><span aria-hidden="true">☎️</span><span><b>Si te sientes en crisis ahora</b>, llama a la Línea 106 del Ministerio de Salud: es nacional, gratuita, confidencial y atiende las 24 horas. — funciona igual en Cali, Pereira, Manizales, Quibdó, Armenia o cualquier ciudad. Marca 106 desde cualquier celular o fijo.</span></div>
-      <p>Si necesitas alguien que te acompañe y escuche, hay <b>psicólogos voluntarios verificados</b> que atienden <b>por internet o teléfono</b>, sin costo, estés donde estés:</p>
+      <p>Sentir miedo o no poder dormir después de un terremoto es <b>normal</b>. Pedir apoyo también.</p>
+      <div class="aviso"><span aria-hidden="true">☎️</span><span><b>Si estás en crisis ahora</b>, llama primero a la línea oficial de salud mental de tu ciudad.</span></div>
+      <p>Hay <b>psicólogos voluntarios verificados</b> que atienden <b>por internet o teléfono</b>, sin costo:</p>
       <button class="btn btn-primario" data-go="r2" data-seg="c">Ver psicólogos voluntarios ›</button>
     </div>
   </details>
-
-  <details class="paso">
-    <summary><span class="num">7</span>Mis hijos están sin clases<span class="mas" aria-hidden="true">+</span></summary>
-    <div class="paso-body">
-      <p>Mientras los colegios reabren, hay <b>profesores voluntarios</b> que dan refuerzo escolar <b>por internet</b>, sin costo.</p>
-      <div class="aviso"><span aria-hidden="true">👪</span><span>Por seguridad de los menores, <b>las clases se coordinan siempre con el acudiente</b> y preferimos las clases en grupo.</span></div>
-      <button class="btn btn-primario" data-go="r2" data-seg="c">Ver profesores voluntarios ›</button>
-    </div>
-  </details>
-
-  <details class="paso">
-    <summary><span class="num">8</span>Cómo evitar estafas<span class="mas" aria-hidden="true">+</span></summary>
-    <div class="paso-body">
-      <ol>
-        <li>Los registros y ayudas del Gobierno son <b>gratis</b>. Nadie puede cobrarte.</li>
-        <li>No des tus datos bancarios por llamadas o enlaces de cadenas.</li>
-        <li>Confía solo en canales de la <b>UNGRD, tu alcaldía y la Cruz Roja</b>.</li>
-      </ol>
-    </div>
+  <details class="paso"><summary><span class="num">6</span>Cómo evitar estafas<span class="mas" aria-hidden="true">+</span></summary>
+    <div class="paso-body"><ol><li>Los registros y ayudas del Gobierno son <b>gratis</b>.</li><li>No des datos bancarios por enlaces de cadenas.</li><li>Confía solo en <b>UNGRD, tu alcaldía y la Cruz Roja</b>.</li></ol></div>
   </details>
 </section>
 
-<!-- QUIERO AYUDAR -->
-<section id="r2" aria-label="Quiero ayudar">
+<!-- ════════════ DONAR / VOLUNTARIOS ════════════ -->
+<section id="r2" aria-label="Donar seguro y voluntarios">
   <button class="volver">‹ Volver</button>
-  <h2 class="h-section">Quiero ayudar</h2>
-  <div class="segs" role="tablist" aria-label="Formas de ayudar">
-    <button class="on" data-seg="a" role="tab" aria-selected="true">💛 Donar<br>seguro</button>
-    <button data-seg="b" role="tab" aria-selected="false">📦 Qué se<br>necesita</button>
-    <button data-seg="c" role="tab" aria-selected="false">🧑‍⚕️ Personas<br>que ayudan</button>
+  <h2 class="h-section">Donar seguro y voluntarios</h2>
+  <div class="segs" role="tablist">
+    <button class="on" data-seg="a" role="tab">💛 Donar<br>seguro</button>
+    <button data-seg="b" role="tab">📦 Qué se<br>necesita</button>
+    <button data-seg="c" role="tab">🧑‍⚕️ Personas<br>que ayudan</button>
   </div>
-
   <div class="subpane on" id="seg-a" role="tabpanel">
     <p class="sub">Estas cuentas son <b>de las entidades</b>, no de personas. Las confirmamos en sus canales oficiales.</p>
     <div class="card">
@@ -385,221 +438,90 @@ footer b{color:#FFD9A8;}
       <p style="font-size:.9rem; color:var(--gris);">Campaña #TodosPorColombia · alimentos, agua, salud y apoyo emocional.</p>
       <div class="dato-copiable"><b>Davivienda</b> · Cuenta corriente 0560455069996490<br>NIT 899999025-3 · también por Daviplata</div>
       <button class="btn btn-copiar" data-copia="0560455069996490">📋 Copiar número de cuenta</button>
-      <a class="ext" href="https://ayuda.cruzrojacolombiana.org" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Donar en línea · página oficial</b><span>ayuda.cruzrojacolombiana.org</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
+      <a class="ext" href="https://ayuda.cruzrojacolombiana.org" target="_blank" rel="noopener"><span class="ext-txt"><b>Donar en línea · página oficial</b><span>ayuda.cruzrojacolombiana.org</span></span><span class="flecha-ext" aria-hidden="true">↗</span></a>
     </div>
     <div class="card">
       <span class="badge-v">✓ Verificado 13 ago</span>
       <h3 style="color:var(--azul); margin:10px 0 4px;">Banco de Alimentos</h3>
-      <p style="font-size:.9rem; color:var(--gris);">Lleva alimentos directamente a albergues y familias.</p>
       <div class="dato-copiable"><b>Llave Bre-B:</b> 0091677852</div>
       <button class="btn btn-copiar" data-copia="0091677852">📋 Copiar llave Bre-B</button>
-      <a class="ext" href="https://www.bancodealimentos.org.co" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Página oficial</b><span>bancodealimentos.org.co</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
-    </div>
-    <div class="card">
-      <span class="badge-v">✓ Verificado 13 ago</span>
-      <h3 style="color:var(--azul); margin:10px 0 4px;">¿Estás fuera de Colombia?</h3>
-      <a class="ext" href="https://presentes.co/dona" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Corporación Presentes · donar con tarjeta</b><span>presentes.co/dona</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
-      <a class="ext" href="https://plan.org.co" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Fundación Plan · campaña Terremoto</b><span>plan.org.co</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
+      <a class="ext" href="https://www.bancodealimentos.org.co" target="_blank" rel="noopener"><span class="ext-txt"><b>Página oficial</b><span>bancodealimentos.org.co</span></span><span class="flecha-ext" aria-hidden="true">↗</span></a>
     </div>
     <div class="card" style="background:var(--ambar-luz); border:none;">
-      <p style="font-size:.9rem;"><b style="color:var(--ambar);">⚠️ Cuídate de las estafas:</b> dona solo a cuentas de entidades (con NIT), nunca a cuentas personales que lleguen por cadenas.</p>
-    </div>
-    <div class="card">
-      <button class="ayuda" aria-expanded="false" data-ayuda="ay-verif">¿Cómo verificamos las cuentas? ⓘ</button>
-      <div class="ayuda-texto" id="ay-verif">1) La entidad existe legalmente y tiene trayectoria. 2) La cuenta es institucional y tiene NIT visible. 3) El canal aparece en la página oficial de la entidad o en al menos dos medios reconocidos. 4) Publicamos la fecha de cada revisión.</div>
+      <p style="font-size:.9rem;"><b style="color:var(--ambar);">⚠️ Cuídate de las estafas:</b> dona solo a cuentas de entidades (con NIT), nunca a cuentas personales de cadenas. Si viste una cuenta personal en el mapa, verifica bien antes de enviar dinero.</p>
     </div>
   </div>
-
   <div class="subpane" id="seg-b" role="tabpanel">
-    <p class="sub">Actualizado con lo que reportan los puntos de ayuda. <b>Lo tachado ya no se necesita.</b></p>
+    <p class="sub">Lo que reportan los puntos de ayuda. <b>Lo tachado ya no se necesita.</b></p>
     <div class="leyenda"><span class="l-si">Sí se necesita</span><span class="l-no">Ya no reciben</span></div>
-    <div class="tags-si-no" id="tags-tablero" aria-label="Lista de necesidades"></div>
-
-    <h3 class="h-section" style="font-size:1.1rem;">Se buscan estos voluntarios</h3>
-    <div class="card">
-      <span class="badge-v">✓ Convocatoria oficial · 13 ago</span>
-      <h4 style="margin:8px 0 2px;">Ingenieros y arquitectos</h4>
-      <p style="font-size:.9rem;">La <b>Cruz Roja Valle</b> necesita ingenieros civiles, estructurales y arquitectos para revisar edificios. Preséntate en la Cra 38 Bis #5-91, Cali.</p>
-    </div>
-    <div class="card">
-      <span class="badge-v">✓ Convocatoria oficial · 13 ago</span>
-      <h4 style="margin:8px 0 2px;">Voluntarios para clasificar donaciones (noche)</h4>
-      <p style="font-size:.9rem;">La <b>Cruz Roja en Bogotá</b> (Cra 24 #73-38, 24 horas) necesita más manos <b>de 5 p.&nbsp;m. a la madrugada</b>.</p>
-    </div>
-
-    <h3 class="h-section" style="font-size:1.1rem;">Dónde llevar donaciones en Bogotá</h3>
-    <div class="card">
-      <p style="font-size:.92rem; line-height:1.8;">• <b>El Campín</b> (Cra 30 con calle 57)<br>• <b>Unicentro</b> (Cra 15 #124-30)<br>• <b>Palacio de los Deportes</b> (Calle 63 #59A-06 · 8 a.m.–8 p.m. · destino Chocó)<br>• <b>Sede Cruz Roja</b> (Cra 24 #73-38 · 24 horas)</p>
-      <a class="ext" href="https://www.eltiempo.com/datos/este-es-el-mapa-completo-de-los-centros-de-acopio-habilitados-en-colombia-para-ayudar-a-los-damnificados-del-terremoto-de-magnitud-7-3577654" target="_blank" rel="noopener">
-        <span class="ext-txt"><b>Mapa nacional de centros de acopio</b><span>eltiempo.com · 40+ puntos en el país</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
+    <div class="tags-si-no" id="tags-tablero"></div>
+    <div class="card" style="background:var(--azul-bruma); border:none; margin-top:16px;">
+      <p style="font-size:.9rem;"><b style="color:var(--azul);">💡 ¿Buscas necesidades por zona?</b><br>El mapa en vivo te muestra qué se necesita en cada lugar exacto, en tiempo real.</p>
+      <button class="btn btn-primario" data-go="mapa-sec" style="margin-top:10px;">Ir al mapa ›</button>
     </div>
   </div>
-
   <div class="subpane" id="seg-c" role="tabpanel">
-    <p class="sub">Personas voluntarias que ofrecen su tiempo. Revisamos cada perfil antes de publicarlo.</p>
+    <p class="sub">Voluntarios verificados. Revisamos cada perfil antes de publicarlo.</p>
     <div class="divisor-nivel">Profesionales verificados</div>
-    <p class="sub" style="font-size:.85rem;">Confirmamos su tarjeta profesional en los registros públicos del país.</p>
+    <p class="sub" style="font-size:.85rem;">Confirmamos su tarjeta profesional en los registros públicos (ReTHUS, COPNIA).</p>
     <div id="lista-prof"></div>
     <div class="card" style="background:var(--ambar-luz); border:none;">
-      <p style="font-size:.9rem;"><b style="color:var(--ambar);">☎️ Importante:</b> si estás en crisis, llama primero a la línea oficial de tu ciudad. Los voluntarios acompañan, no atienden urgencias.</p>
+      <p style="font-size:.9rem;"><b style="color:var(--ambar);">☎️ Importante:</b> si estás en crisis, llama primero a la línea oficial de tu ciudad.</p>
     </div>
     <div class="divisor-nivel">Otras ayudas voluntarias</div>
-    <p class="sub" style="font-size:.85rem;">Personas cuyos datos de contacto confirmamos por teléfono.</p>
     <div id="lista-gral"></div>
     <div class="card" style="background:var(--azul-bruma); border:none;">
       <p style="font-size:.95rem; font-weight:700; color:var(--azul);">¿Quieres aparecer aquí?</p>
-      <p style="font-size:.9rem; margin:4px 0 12px;">Ofrece tu profesión o tu tiempo: verificamos tu perfil y lo publicamos.</p>
+      <p style="font-size:.9rem; margin:4px 0 12px;">Verificamos tu perfil y lo publicamos.</p>
       <button class="btn btn-primario" data-go="rform">Ofrecer mi ayuda ›</button>
     </div>
   </div>
 </section>
 
-<!-- OFREZCO AYUDA -->
+<!-- ════════════ OFREZCO AYUDA ════════════ -->
 <section id="rform" aria-label="Ofrezco mi ayuda">
   <button class="volver">‹ Volver</button>
   <h2 class="h-section">Ofrece tu ayuda</h2>
   <p class="sub">Gracias por querer ayudar 💙. Revisamos cada perfil y te respondemos en <b>máximo 48 horas</b>.</p>
-
   <p style="margin:4px 18px; font-weight:700;">¿Tu profesión tiene tarjeta o registro profesional?</p>
-  <button class="ayuda" style="margin:6px 18px;" aria-expanded="false" data-ayuda="ay-tarjeta">¿Qué es eso? ⓘ</button>
-  <div class="ayuda-texto" id="ay-tarjeta" style="margin:0 18px;">Algunas profesiones (psicología, medicina, ingeniería, arquitectura, derecho) tienen un registro oficial del Estado. Si es tu caso, elige "Sí": te verificamos y tu perfil sale con el sello verde de confianza.</div>
-
-  <div class="rama" role="radiogroup" aria-label="Tipo de ayuda">
+  <div class="rama" role="radiogroup">
     <button class="on" data-rama="prof" role="radio" aria-checked="true">✅ Sí, soy profesional con registro</button>
     <button data-rama="gral" role="radio" aria-checked="false">🤲 No, ofrezco otra ayuda</button>
   </div>
-
   <form id="form-persona" onsubmit="return false;">
-    <div class="campo">
-      <label for="f-nombre">Tu nombre completo *</label>
-      <input id="f-nombre" type="text" autocomplete="name" placeholder="Ej.: María González Pérez" required>
-      <p class="apoyo">En el sitio solo se mostrará tu nombre y la inicial del apellido: "María G."</p>
-    </div>
-    <div class="campo" data-solo="prof">
-      <label for="f-cedula">Tu número de cédula *</label>
-      <input id="f-cedula" type="text" inputmode="numeric" placeholder="Solo números">
-      <p class="apoyo">🔒 La usamos únicamente para confirmar tu tarjeta profesional en el registro oficial. <b>Nunca se publica ni se comparte.</b></p>
-    </div>
-    <div class="campo" data-solo="prof">
-      <label for="f-prof">Tu profesión *</label>
-      <select id="f-prof">
-        <option value="">Elige una opción…</option>
-        <option>Psicología</option><option>Medicina</option><option>Enfermería</option>
-        <option>Ingeniería civil / estructural</option><option>Arquitectura</option><option>Derecho</option>
-      </select>
-    </div>
-    <div class="campo" data-solo="gral" style="display:none;">
-      <label for="f-tipo">¿Qué ayuda ofreces? *</label>
-      <select id="f-tipo">
-        <option value="">Elige una opción…</option>
-        <option>Clases / refuerzo escolar por internet</option><option>Transporte</option>
-        <option>Clasificar donaciones</option><option>Traducción</option><option>Cuidado de mascotas</option><option>Otra</option>
-      </select>
-    </div>
-    <div class="campo">
-      <label for="f-modo">¿Cómo puedes ayudar?</label>
-      <select id="f-modo">
-        <option>💻 Por internet o teléfono (desde cualquier ciudad)</option>
-        <option>📍 En persona</option>
-      </select>
-    </div>
-    <div class="campo">
-      <label for="f-ciudad">Tu ciudad</label>
-      <input id="f-ciudad" type="text" placeholder="Ej.: Bogotá">
-    </div>
-    <div class="campo">
-      <label for="f-disp">¿Qué días y horas puedes ofrecer?</label>
-      <input id="f-disp" type="text" placeholder="Ej.: jueves 5 y 6 p. m., sábado 10 a. m.">
-      <p class="apoyo">Estos horarios aparecerán como "espacios" en tu perfil. Puedes cambiarlos cuando quieras escribiéndonos.</p>
-    </div>
-    <div class="campo">
-      <label for="f-cupos">¿Cuántas personas puedes atender por semana?</label>
-      <input id="f-cupos" type="text" inputmode="numeric" placeholder="Ej.: 3">
-      <p class="apoyo">Para cuidarte: cuando se llenen, tu perfil dirá "agenda llena".</p>
-    </div>
-    <div class="campo">
-      <label for="f-contacto">Teléfono o WhatsApp para recibir solicitudes *</label>
-      <input id="f-contacto" type="tel" autocomplete="tel" placeholder="Ej.: 300 123 4567" required>
-    </div>
-    <div class="consent">
-      <input type="checkbox" id="f-consent">
-      <label for="f-consent" style="font-weight:400;">Autorizo que este contacto aparezca publicado para que las personas puedan escribirme, y el tratamiento de mis datos para la verificación. (Ley 1581 de 2012.)</label>
-    </div>
-    <div class="error-envio" id="err-persona">No pudimos enviar tu formulario. Revisa tu conexión e inténtalo de nuevo, o escríbenos por WhatsApp.</div>
+    <div class="campo" style="margin:12px 18px;"><label for="f-nombre">Tu nombre completo *</label><input id="f-nombre" type="text" placeholder="Ej.: María González Pérez"><p class="apoyo">Solo se mostrará "María G."</p></div>
+    <div class="campo" data-solo="prof" style="margin:12px 18px;"><label for="f-cedula">Tu número de cédula *</label><input id="f-cedula" type="text" inputmode="numeric" placeholder="Solo números"><p class="apoyo">🔒 Solo para verificar tu tarjeta profesional. <b>Nunca se publica.</b></p></div>
+    <div class="campo" data-solo="prof" style="margin:12px 18px;"><label for="f-prof">Tu profesión *</label><select id="f-prof"><option value="">Elige…</option><option>Psicología</option><option>Medicina</option><option>Enfermería</option><option>Ingeniería civil / estructural</option><option>Arquitectura</option><option>Derecho</option></select></div>
+    <div class="campo" data-solo="gral" style="margin:12px 18px; display:none;"><label for="f-tipo">¿Qué ayuda ofreces? *</label><select id="f-tipo"><option value="">Elige…</option><option>Clases / refuerzo escolar por internet</option><option>Transporte</option><option>Clasificar donaciones</option><option>Traducción</option><option>Otra</option></select></div>
+    <div class="campo" style="margin:12px 18px;"><label for="f-modo">¿Cómo puedes ayudar?</label><select id="f-modo"><option>💻 Por internet o teléfono</option><option>📍 En persona</option></select></div>
+    <div class="campo" style="margin:12px 18px;"><label for="f-disp">¿Qué días y horas?</label><input id="f-disp" type="text" placeholder="Ej.: jueves 5 y 6 p. m."></div>
+    <div class="campo" style="margin:12px 18px;"><label for="f-contacto">WhatsApp para recibir solicitudes *</label><input id="f-contacto" type="tel" placeholder="Ej.: 300 123 4567"></div>
+    <div class="consent"><input type="checkbox" id="f-consent"><label for="f-consent" style="font-weight:400;">Autorizo publicar este contacto y el tratamiento de mis datos para la verificación. (Ley 1581 de 2012.)</label></div>
+    <div class="error-envio" id="err-persona"></div>
     <div class="wrap"><button type="button" class="btn btn-primario" id="btn-enviar">Enviar mi ofrecimiento</button></div>
   </form>
-
-  <div class="confirmacion" id="conf" role="status">
-    <span class="check" aria-hidden="true">✅</span>
-    <h3>¡Recibimos tu ofrecimiento!</h3>
-    <p>Vamos a verificar tus datos y te escribiremos en <b>máximo 48 horas</b>. Gracias por sumarte 💙</p>
-  </div>
+  <div class="confirmacion" id="conf"><span class="check">✅</span><h3>¡Recibimos tu ofrecimiento!</h3><p>Te escribiremos en <b>máximo 48 horas</b>. Gracias 💙</p></div>
 </section>
 
-<!-- SOY UN PUNTO -->
-<section id="r3" aria-label="Soy un albergue o punto de ayuda">
-  <button class="volver">‹ Volver</button>
-  <h2 class="h-section">Cuéntanos qué necesita tu punto</h2>
-  <p class="sub">Para albergues, centros de acopio y organizaciones. Publicamos tu reporte después de confirmarlo por teléfono.</p>
-  <form id="form-punto" onsubmit="return false;">
-    <div class="campo"><label for="o-nombre">Nombre del punto u organización *</label><input id="o-nombre" type="text" placeholder="Ej.: Albergue Coliseo del Café" required></div>
-    <div class="campo"><label for="o-dir">Ciudad y dirección *</label><input id="o-dir" type="text" placeholder="Ej.: Pereira, Calle 14 #23-50" required></div>
-    <div class="campo">
-      <label for="o-contacto">Teléfono de un responsable y su cargo *</label>
-      <input id="o-contacto" type="tel" placeholder="Ej.: 310 555 4433 — coordinadora" required>
-      <p class="apoyo">Llamaremos a este número para confirmar antes de publicar.</p>
-    </div>
-    <div class="campo"><label for="o-si">¿Qué SÍ necesitan hoy? *</label><textarea id="o-si" placeholder="Ej.: agua, pañales talla M, gasas"></textarea></div>
-    <div class="campo">
-      <label for="o-no">¿Qué YA NO reciben? *</label>
-      <textarea id="o-no" placeholder="Ej.: ropa usada"></textarea>
-      <p class="apoyo">Muy importante: evita que la gente lleve cosas que ya no caben o no sirven.</p>
-    </div>
-    <div class="campo"><label for="o-prof">¿Necesitan voluntarios o profesionales? ¿Cuáles?</label><input id="o-prof" type="text" placeholder="Ej.: 2 enfermeras, ayuda de carga en la tarde"></div>
-    <div class="error-envio" id="err-punto">No pudimos enviar tu reporte. Revisa tu conexión e inténtalo de nuevo.</div>
-    <div class="wrap"><button type="button" class="btn btn-primario" id="btn-org">Enviar reporte</button></div>
-  </form>
-  <div class="confirmacion" id="conf-org" role="status">
-    <span class="check" aria-hidden="true">✅</span>
-    <h3>¡Reporte recibido!</h3>
-    <p>Te llamaremos para confirmarlo y lo publicamos en seguida. Gracias por mantener la información al día.</p>
-  </div>
-</section>
-
-<!-- AHORA: NOVEDADES + ZONAS -->
-<section id="ahora" data-nav="home" aria-label="Novedades y estado de zonas">
+<!-- ════════════ AHORA ════════════ -->
+<section id="ahora" data-nav="home" aria-label="Novedades y zonas">
   <button class="volver">‹ Volver</button>
   <h2 class="h-section">Cómo está la situación</h2>
-  <div class="segs" role="tablist" aria-label="Novedades y zonas">
-    <button class="on" data-segn="n1" role="tab" aria-selected="true">📰 Novedades</button>
-    <button data-segn="n2" role="tab" aria-selected="false">🚧 Zonas y vías</button>
+  <div class="segs" role="tablist">
+    <button class="on" data-segn="n1" role="tab">📰 Novedades</button>
+    <button data-segn="n2" role="tab">🚧 Zonas y vías</button>
   </div>
   <div class="subpane on" id="segn-n1" role="tabpanel">
-    <p class="sub">Actualizaciones cortas y verificadas. Lo más reciente arriba.</p>
+    <p class="sub">Actualizaciones cortas y verificadas.</p>
     <div class="card" style="padding:6px 18px;" id="feed-full"></div>
   </div>
   <div class="subpane" id="segn-n2" role="tabpanel">
-    <p class="sub">Reportes de personas en terreno (brigadistas y organismos) más canales oficiales. <b>Cada reporte muestra quién lo envió y cuándo.</b> Los reportes de más de 24 horas se retiran.</p>
-    <div class="ciudades" id="sel-ciudades" role="tablist" aria-label="Elige tu ciudad"></div>
-    <div class="zona-lista" id="lista-zonas"></div>
-    <div class="card" style="margin-top:14px;">
-      <a class="ext" href="https://www.invias.gov.co" target="_blank" rel="noopener" style="margin:0;">
-        <span class="ext-txt"><b>INVÍAS · estado oficial de las vías</b><span>invias.gov.co · o marca #767 gratis</span></span>
-        <span class="flecha-ext" aria-hidden="true">↗</span></a>
-      <a class="ext" href="tel:767">
-        <span class="ext-txt"><b>📞 Marcar #767 · línea de carreteras 24 h</b><span>Gratis desde tu celular</span></span></a>
-    </div>
-    <div class="card" style="background:var(--ambar-luz); border:none;">
-      <p style="font-size:.88rem;"><b style="color:var(--ambar);">⚠️ Importante:</b> esta información cambia rápido. Ante cualquier duda, manda la información oficial de tu alcaldía, los Bomberos y la Policía.</p>
+    <p class="sub">Reportes de personas en terreno. <b>Los de más de 24 horas se retiran.</b></p>
+    <div class="ciudades" id="sel-ciudades" style="display:flex; gap:8px; overflow-x:auto; padding:4px 18px 8px;"></div>
+    <div id="lista-zonas" style="margin:10px 18px;"></div>
+    <div class="card">
+      <a class="ext" href="https://www.invias.gov.co" target="_blank" rel="noopener" style="margin:0;"><span class="ext-txt"><b>INVÍAS · estado oficial de vías</b><span>invias.gov.co · o marca #767</span></span><span class="flecha-ext" aria-hidden="true">↗</span></a>
+      <a class="ext" href="tel:767"><span class="ext-txt"><b>📞 Marcar #767 · carreteras 24 h</b><span>Gratis desde tu celular</span></span></a>
     </div>
   </div>
 </section>
@@ -608,49 +530,43 @@ footer b{color:#FFD9A8;}
 
 <footer>
   <b>Brújula Colombia</b> es una iniciativa ciudadana independiente y sin ánimo de lucro. No reemplaza los canales oficiales del Estado.<br><br>
-  Verificamos con: <b>UNGRD</b> (portal.gestiondelriesgo.gov.co) · <b>ReTHUS</b>, registro del talento en salud (sispro.gov.co) · <b>COPNIA</b>, matrículas de ingeniería (copnia.gov.co) · alcaldías y Cruz Roja Colombiana.<br>
+  🗺️ <b>Mapa colaborativo</b> desarrollado por <b>[NOMBRE_AMIGO]</b>. · Guía e información verificada con: UNGRD · ReTHUS · COPNIA · alcaldías · Cruz Roja.<br>
   <span id="pie-fecha">Última revisión general: 13 de agosto de 2026.</span>
 </footer>
 
-<nav aria-label="Secciones del sitio">
-  <button class="active" data-t="home"><span class="ico" aria-hidden="true">🏠</span>Inicio</button>
+<nav aria-label="Secciones">
+  <button data-t="home"><span class="ico" aria-hidden="true">🏠</span>Inicio</button>
   <button data-t="r1"><span class="ico" aria-hidden="true">🤝</span>Necesito<br>ayuda</button>
-  <button data-t="r2"><span class="ico" aria-hidden="true">💛</span>Quiero<br>ayudar</button>
+  <button class="mapa-tab active" data-t="mapa-sec"><span class="ico" aria-hidden="true">🗺️</span>Mapa</button>
+  <button data-t="r2"><span class="ico" aria-hidden="true">💛</span>Donar</button>
   <button data-t="rform"><span class="ico" aria-hidden="true">🙋</span>Ofrezco<br>ayuda</button>
-  <button data-t="r3"><span class="ico" aria-hidden="true">📦</span>Soy un<br>punto</button>
 </nav>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <script>
-/* ══════════════════════════════════════════════════════════
-   CONFIGURACIÓN — el único lugar que debes tocar
-   Pega aquí la URL de tu Apps Script (guia-de-montaje.md, paso 3)
-   ══════════════════════════════════════════════════════════ */
+/* ═══════════ CONFIG ═══════════ */
 const CONFIG = {
+  // Tu Google Sheet (guía, donaciones, directorio, novedades, zonas)
   API_URL: "https://script.google.com/macros/s/AKfycbzxR3veQlinFJKz1OVyJ991X7kjkVytxO4p1IqOaXnVXGBGC8JpfiTgXzx_Lv0R_7KaCw/exec"
 };
-
-/* ---------- Datos semilla (se muestran si el Sheet aún no responde) ---------- */
-const SEED = {
-  actualizado: "13 de agosto, 9:40 a. m.",
-  novedades: [
-    {hora:"Hoy 9:15", texto:"Se activó el subsidio de arriendo en Manizales; Pereira y Cali vienen en camino.", fuente:"Presidencia · verificado"},
-    {hora:"Hoy 8:40", texto:"La Cruz Roja en Bogotá pide cajas grandes y cinta de embalaje.", fuente:"Cruz Roja · verificado"},
-    {hora:"Ayer 7:10 p.m.", texto:"El Palacio de los Deportes recibe donaciones para Chocó, de 8 a. m. a 8 p. m.", fuente:"Alcaldía de Bogotá · verificado"}
-  ],
-  necesidades: [
-    {item:"Agua embotellada", estado:"si"},{item:"Pañales (niño y adulto)", estado:"si"},
-    {item:"Gasas estériles", estado:"si"},{item:"Enlatados abre fácil", estado:"si"},
-    {item:"Leche en polvo", estado:"si"},{item:"Cajas grandes y cinta", estado:"si"},
-    {item:"Comida para mascotas", estado:"si"},{item:"Ropa usada", estado:"no"},{item:"Peluches", estado:"no"}
-  ],
-  personas: [],
-  zonas: []
+// Firebase del MAPA (base de datos de tu amigo — el mapa colaborativo)
+const firebaseConfig = {
+  apiKey: "AIzaSyCWPFmX6TmnjS1DkDzguqLNwgyZNYohOx8",
+  authDomain: "juntosayudamos-col.firebaseapp.com",
+  databaseURL: "https://juntosayudamos-col-default-rtdb.firebaseio.com",
+  projectId: "juntosayudamos-col",
+  storageBucket: "juntosayudamos-col.firebasestorage.app",
+  messagingSenderId: "32757771591",
+  appId: "1:32757771591:web:9a44f7ae92f9605e5ab062"
 };
+const CLAVE_MAESTRA = "2026";
 
-/* ---------- Navegación ---------- */
+/* ═══════════ NAVEGACIÓN ═══════════ */
 const tabs=document.querySelectorAll('nav button');
-const historial=['home'];
+const historial=['mapa-sec'];
 function go(id,desdeAtras){
   const sec=document.getElementById(id); if(!sec) return;
   const navId=sec.dataset.nav||id;
@@ -658,8 +574,9 @@ function go(id,desdeAtras){
   document.querySelectorAll('main > section').forEach(s=>s.classList.toggle('visible',s.id===id));
   if(!desdeAtras && historial[historial.length-1]!==id) historial.push(id);
   window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='mapa-sec' && window.mapa){ setTimeout(()=>window.mapa.invalidateSize(),200); }
 }
-function atras(){ if(historial.length>1){historial.pop(); go(historial[historial.length-1],true);} else go('home',true); }
+function atras(){ if(historial.length>1){historial.pop(); go(historial[historial.length-1],true);} else go('mapa-sec',true); }
 tabs.forEach(b=>b.addEventListener('click',()=>go(b.dataset.t)));
 document.querySelectorAll('.volver').forEach(b=>b.addEventListener('click',atras));
 document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>{
@@ -667,137 +584,393 @@ document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',(
   if(el.dataset.seg) mostrarSeg(el.dataset.seg);
   if(el.dataset.abrir){const d=document.getElementById(el.dataset.abrir); if(d){d.open=true; setTimeout(()=>d.scrollIntoView({behavior:'smooth'}),200);}}
 }));
-
-const segBtns=document.querySelectorAll('.segs [data-seg]');
-function mostrarSeg(k){
-  segBtns.forEach(b=>{b.classList.toggle('on',b.dataset.seg===k); b.setAttribute('aria-selected',b.dataset.seg===k);});
-  document.querySelectorAll('#r2 .subpane').forEach(p=>p.classList.toggle('on',p.id==='seg-'+k));
-}
+const segBtns=document.querySelectorAll('#r2 .segs [data-seg]');
+function mostrarSeg(k){ segBtns.forEach(b=>b.classList.toggle('on',b.dataset.seg===k)); document.querySelectorAll('#r2 .subpane').forEach(p=>p.classList.toggle('on',p.id==='seg-'+k)); }
 segBtns.forEach(b=>b.addEventListener('click',()=>mostrarSeg(b.dataset.seg)));
 document.querySelectorAll('[data-segn]').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('[data-segn]').forEach(x=>{x.classList.toggle('on',x===b); x.setAttribute('aria-selected',x===b);});
+  document.querySelectorAll('[data-segn]').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('#ahora .subpane').forEach(p=>p.classList.toggle('on',p.id==='segn-'+b.dataset.segn));
 }));
-
 document.querySelectorAll('.ayuda[data-ayuda]').forEach(b=>b.addEventListener('click',()=>{
-  const t=document.getElementById(b.dataset.ayuda);
-  const abierta=t.classList.toggle('abierta');
-  b.setAttribute('aria-expanded',abierta);
+  const t=document.getElementById(b.dataset.ayuda); const a=t.classList.toggle('abierta'); b.setAttribute('aria-expanded',a);
 }));
 
-/* ---------- Render dinámico ---------- */
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* ═══════════ MAPA (Leaflet + Firebase) ═══════════ */
+let imagenBase64Actual=null, marcadorPicker=null, ubicacionUsuarioGPS=null;
+const mapaMarcadores={};
+const misVerificaciones=JSON.parse(localStorage.getItem('misVerificaciones'))||[];
+let firebaseActivo=false, referenciaSolicitudes=null, listaGlobalPublicaciones=[];
 
+const mapa=L.map('mapa',{doubleClickZoom:false}).setView([4.5709,-74.2973],6);
+window.mapa=mapa;
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(mapa);
+setTimeout(()=>mapa.invalidateSize(),300);
+
+mapa.on('dblclick',function(e){
+  const lat=e.latlng.lat, lng=e.latlng.lng;
+  document.getElementById('campoLatitud').value=lat.toFixed(5);
+  document.getElementById('campoLongitud').value=lng.toFixed(5);
+  if(marcadorPicker) mapa.removeLayer(marcadorPicker);
+  marcadorPicker=L.marker([lat,lng]).addTo(mapa);
+  actualizarDireccionPorReverse(lat,lng);
+  abrirFormulario();
+});
+async function actualizarDireccionPorReverse(lat,lng){
+  try{ const res=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`); const d=await res.json();
+    if(d&&d.display_name&&!document.getElementById('campoUbicacion').value) document.getElementById('campoUbicacion').value=d.display_name.split(',').slice(0,3).join(', ');
+  }catch(e){}
+}
+function calcularDistanciaKm(la1,lo1,la2,lo2){const R=6371,dLa=(la2-la1)*Math.PI/180,dLo=(lo2-lo1)*Math.PI/180;const a=Math.sin(dLa/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function ejecutarAccionConGPS(tLat,tLng,cb){
+  if(!("geolocation" in navigator)){alert("⚠️ Tu dispositivo no soporta GPS, necesario para validar en terreno.");return;}
+  if(!confirm("📍 Para garantizar autenticidad, verificaremos que estés a menos de 50 metros del lugar. ¿Validar tu ubicación GPS actual?"))return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const d=Math.round(calcularDistanciaKm(pos.coords.latitude,pos.coords.longitude,tLat,tLng)*1000);
+    if(d<=50) cb(); else alert(`🚫 Estás a unos ${d} metros. Para validar o reportar debes estar a menos de 50 metros del lugar (en terreno).`);
+  },()=>alert("⚠️ No pudimos obtener tu GPS. Habilita los permisos de ubicación."),{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+}
+try{
+  firebase.initializeApp(firebaseConfig);
+  referenciaSolicitudes=firebase.database().ref('solicitudes_ayuda');
+  firebaseActivo=true;
+  const ec=document.getElementById('estadoConexion'); ec.textContent='🟢 Mapa en vivo'; ec.classList.add('live');
+  document.getElementById('dot-estado').classList.remove('amber');
+  referenciaSolicitudes.on('value',snap=>{ const data=snap.val()||{}; listaGlobalPublicaciones=Object.keys(data).map(k=>({id:k,...data[k]})); aplicarFiltrosYOrden(); });
+}catch(e){
+  document.getElementById('estadoConexion').textContent='🟡 Modo local';
+  listaGlobalPublicaciones=JSON.parse(localStorage.getItem('solicitudesDemoV17'))||[];
+  aplicarFiltrosYOrden();
+}
+function obtenerUbicacionUsuario(){
+  const btn=document.getElementById('btnGPS'); btn.textContent="⏳…";
+  if("geolocation" in navigator){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      ubicacionUsuarioGPS={lat:pos.coords.latitude,lng:pos.coords.longitude};
+      btn.textContent="✅ GPS activo"; btn.classList.add('on');
+      document.getElementById('ordenamiento').value="cercanos";
+      mapa.setView([ubicacionUsuarioGPS.lat,ubicacionUsuarioGPS.lng],13);
+      aplicarFiltrosYOrden();
+    },()=>{alert("No se obtuvo tu ubicación.");btn.textContent="📡 Mi ubicación";});
+  }
+}
+async function buscarMunicipioPrincipal(){
+  let q=document.getElementById('buscadorPrincipal').value.trim(); if(!q)return;
+  if(!q.toLowerCase().includes("colombia"))q+=", Colombia";
+  try{ const res=await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=co&limit=1&q=${encodeURIComponent(q)}`); const d=await res.json();
+    if(d&&d.length) mapa.setView([parseFloat(d[0].lat),parseFloat(d[0].lon)],15); else alert("No se encontró el lugar.");
+  }catch(e){alert("Error al buscar.");}
+}
+function crearIcono(mod,atendido){
+  let emoji=mod==='ofrece'?'🟢':'🔴', bg=mod==='ofrece'?'#1B6B45':'#A32222';
+  if(atendido){emoji='⚪';bg='#6b7280';}
+  return L.divIcon({className:'custom-pin',html:`<div style="background:${bg};color:#fff;border:2px solid #fff;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 6px rgba(0,0,0,.3);">${emoji}</div>`,iconSize:[34,34],iconAnchor:[17,17]});
+}
+function aplicarFiltrosYOrden(){
+  const cat=document.getElementById('filtroCategoria').value, mod=document.getElementById('filtroModalidad').value, orden=document.getElementById('ordenamiento').value;
+  let r=listaGlobalPublicaciones.filter(p=>!p.desactivado);
+  if(cat!=='todos') r=r.filter(p=>(p.tiposActivos||[]).includes(cat)||(p.tiposInactivos||[]).includes(cat));
+  if(mod!=='todos') r=r.filter(p=>p.modalidad===mod);
+  if(orden==='urgentes'){const peso={'Alta':3,'Media':2,'Baja':1};r.sort((a,b)=>(peso[b.prioridad]||0)-(peso[a.prioridad]||0));}
+  else if(orden==='cercanos'&&ubicacionUsuarioGPS){r.sort((a,b)=>calcularDistanciaKm(ubicacionUsuarioGPS.lat,ubicacionUsuarioGPS.lng,a.lat,a.lng)-calcularDistanciaKm(ubicacionUsuarioGPS.lat,ubicacionUsuarioGPS.lng,b.lat,b.lng));}
+  else r.sort((a,b)=>(b.fechaCreacion||0)-(a.fechaCreacion||0));
+  renderizarContenedorYMapa(r);
+}
+const escM=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function renderizarContenedorYMapa(items){
+  Object.keys(mapaMarcadores).forEach(k=>mapa.removeLayer(mapaMarcadores[k]));
+  const cont=document.getElementById('contenedorTarjetas'); cont.innerHTML='';
+  if(!items.length){cont.innerHTML='<p class="sub" style="text-align:center;padding:20px;">No hay publicaciones con estos filtros. ¡Sé la primera en publicar con doble toque en el mapa!</p>';return;}
+  items.forEach(item=>{
+    const id=item.id, vCount=item.verificaciones||1, rCount=item.reportesCount||0, esVerificado=vCount>=3;
+    const yaVerifique=misVerificaciones.includes(String(id));
+    const tActivos=item.tiposActivos||[], tInactivos=item.tiposInactivos||[];
+    const atendido=tActivos.length===0&&tInactivos.length>0;
+    const icono=crearIcono(item.modalidad,atendido);
+    const marcador=L.marker([item.lat,item.lng],{icon:icono}).addTo(mapa)
+      .bindPopup(`<div style="font-family:sans-serif;min-width:180px"><b>${item.modalidad==='ofrece'?'🟢 Oferta':'🔴 Necesidad'}</b><br><b>${escM(item.ubicacion)}</b><p style="font-size:12px;color:#555">${escM(item.descripcion)}</p><button onclick="scrollACard('${id}')" style="width:100%;background:#14304F;color:#fff;border:none;padding:6px;border-radius:8px;font-weight:700;font-size:11px">Ver detalle 👇</button></div>`);
+    mapaMarcadores[id]=marcador;
+    let distHTML=''; if(ubicacionUsuarioGPS){const d=calcularDistanciaKm(ubicacionUsuarioGPS.lat,ubicacionUsuarioGPS.lng,item.lat,item.lng);distHTML=`<span class="dist-badge">📏 ${d.toFixed(1)} km</span>`;}
+    let tiposHTML='';
+    tActivos.forEach(t=>tiposHTML+=`<span class="tm-tipo" onclick="alternarTipoAyuda('${id}','${escM(t)}',true)">${escM(t)}</span>`);
+    tInactivos.forEach(t=>tiposHTML+=`<span class="tm-tipo off" onclick="alternarTipoAyuda('${id}','${escM(t)}',false)">${escM(t)} (ok)</span>`);
+    const img=item.imagen?`<img src="${item.imagen}" class="tm-img" onclick="abrirImagenFull('${item.imagen}')">`:'';
+    const otro=item.otroDetalle?`<div class="tm-otro"><b>💡 Otro:</b> ${escM(item.otroDetalle)}</div>`:'';
+    const wa=item.contacto?`<a class="tm-wa" href="https://wa.me/57${String(item.contacto).replace(/\D/g,'')}" target="_blank">💬 Contactar</a>`:`<span style="color:var(--gris);font-style:italic;font-size:.82rem;">Sin teléfono</span>`;
+    const cls=atendido?'atendido':item.modalidad;
+    cont.insertAdjacentHTML('beforeend',`
+      <div id="card-${id}" class="tm-card ${cls}">
+        <div class="tm-top">
+          <span class="tm-tag ${item.modalidad}">${item.modalidad==='ofrece'?'🟢 OFERTA':'🔴 NECESIDAD'} · ${escM(item.prioridad||'Media')}</span>
+          <div style="display:flex;gap:6px;align-items:center;">${distHTML}<span class="tm-estado ${esVerificado?'val':'pend'}">${esVerificado?'✅ Validado':'⚠️ '+vCount+'/3'}</span></div>
+        </div>
+        <h4>${escM(item.ubicacion)}</h4>
+        ${img}
+        <p class="tm-desc">${escM(item.descripcion)}</p>
+        ${otro}
+        <div class="tm-tipos">${tiposHTML}</div>
+        <div class="tm-acciones">
+          <div class="tm-fila">${wa}<button class="tm-vermapa" onclick="centrarMapa([${item.lat},${item.lng}],17)">Ver en mapa →</button></div>
+          <button class="btn-validar" onclick="verificarSolicitud('${id}',${vCount},${item.lat},${item.lng})" ${(yaVerifique||esVerificado)?'disabled':''}>${esVerificado?'✅ Validado en terreno':(yaVerifique?'👍 Ya confirmaste':'🙋 Validar en terreno (< 50m)')}</button>
+          <div class="tm-mini">
+            <div style="display:flex;gap:12px;"><button onclick="editarPublicacion('${id}')">✏️ Editar</button><button onclick="desactivarPublicacion('${id}')">🗑️ Borrar</button></div>
+            <button onclick="reportarFalsa('${id}',${rCount},${item.lat},${item.lng})">🚨 Reportar (${rCount}/3)</button>
+          </div>
+        </div>
+      </div>`);
+  });
+}
+function centrarMapa(c,z){ go('mapa-sec'); setTimeout(()=>mapa.setView(c,z),250); }
+function scrollACard(id){ const t=document.getElementById(`card-${id}`); if(t){t.scrollIntoView({behavior:'smooth',block:'center'});} }
+function abrirImagenFull(src){ if(!src)return; document.getElementById('imgFullTarget').src=src; document.getElementById('modalImagenFull').classList.add('on'); }
+function cerrarImagenFull(){ document.getElementById('modalImagenFull').classList.remove('on'); }
+
+/* Formulario del mapa */
+function abrirFormulario(){ document.getElementById('modalFormulario').classList.add('on'); }
+function cerrarFormulario(){ document.getElementById('modalFormulario').classList.remove('on'); }
+function abrirInstrucciones(){ document.getElementById('modalInstrucciones').classList.add('on'); }
+function cerrarInstrucciones(){ document.getElementById('modalInstrucciones').classList.remove('on'); }
+function abrirFormularioNueva(){
+  const c=mapa.getCenter();
+  document.getElementById('campoLatitud').value=c.lat.toFixed(5);
+  document.getElementById('campoLongitud').value=c.lng.toFixed(5);
+  document.getElementById('editId').value="";
+  document.getElementById('tituloModal').textContent="Publicar ayuda";
+  document.getElementById('formularioAyuda').reset();
+  document.getElementById('campoOtroDetalle').value=""; quitarImagen(); toggleOtroDetalle();
+  abrirFormulario();
+}
+function toggleOtroDetalle(){ const chk=document.getElementById('chkOtro'); document.getElementById('containerOtroDetalle').style.display=(chk&&chk.checked)?'block':'none'; }
+function marcarTodosTipos(v){ document.querySelectorAll('.chk-tipo').forEach(c=>c.checked=v); toggleOtroDetalle(); }
+function procesarImagen(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{ const img=new Image(); img.onload=()=>{
+    const canvas=document.createElement('canvas'); const MAX=600; let w=img.width,h=img.height;
+    if(w>h){if(w>MAX){h*=MAX/w;w=MAX;}}else{if(h>MAX){w*=MAX/h;h=MAX;}}
+    canvas.width=w;canvas.height=h; canvas.getContext('2d').drawImage(img,0,0,w,h);
+    imagenBase64Actual=canvas.toDataURL('image/jpeg',0.6);
+    document.getElementById('previewImagen').src=imagenBase64Actual;
+    document.getElementById('containerPreview').style.display='block';
+  }; img.src=ev.target.result; };
+  reader.readAsDataURL(file);
+}
+function quitarImagen(){ imagenBase64Actual=null; document.getElementById('campoImagen').value=''; document.getElementById('containerPreview').style.display='none'; }
+function editarPublicacion(id){
+  const item=listaGlobalPublicaciones.find(p=>String(p.id)===String(id)); if(!item)return;
+  const pin=prompt("PIN de 4 dígitos de esta publicación:"); if(!pin)return;
+  if(pin===String(item.pin)||pin===CLAVE_MAESTRA){
+    document.getElementById('editId').value=id;
+    document.getElementById('tituloModal').textContent="Modificar publicación";
+    document.getElementById('campoUbicacion').value=item.ubicacion||"";
+    document.getElementById('campoPrioridad').value=item.prioridad||"Media";
+    document.getElementById('campoDescripcion').value=item.descripcion||"";
+    document.getElementById('campoLatitud').value=item.lat;
+    document.getElementById('campoLongitud').value=item.lng;
+    document.getElementById('campoContacto').value=item.contacto||"";
+    document.getElementById('campoPin').value=item.pin||"";
+    document.getElementById('campoOtroDetalle').value=item.otroDetalle||"";
+    document.getElementById('chkOtro').checked=(item.tiposActivos||[]).includes('💡 Otro (Donaciones, Apoyo, etc.)')||(item.tiposInactivos||[]).includes('💡 Otro (Donaciones, Apoyo, etc.)');
+    toggleOtroDetalle();
+    if(item.imagen){imagenBase64Actual=item.imagen;document.getElementById('previewImagen').src=item.imagen;document.getElementById('containerPreview').style.display='block';}else quitarImagen();
+    abrirFormulario();
+  }else alert("❌ PIN incorrecto.");
+}
+function desactivarPublicacion(id){
+  const item=listaGlobalPublicaciones.find(p=>String(p.id)===String(id)); if(!item)return;
+  const pin=prompt("PIN de 4 dígitos para borrar:"); if(!pin)return;
+  if(pin===String(item.pin)||pin===CLAVE_MAESTRA){
+    if(confirm("¿Confirmas eliminar esta publicación?")){
+      if(firebaseActivo) referenciaSolicitudes.child(id).update({desactivado:true});
+      else{item.desactivado=true;localStorage.setItem('solicitudesDemoV17',JSON.stringify(listaGlobalPublicaciones));aplicarFiltrosYOrden();}
+    }
+  }else alert("❌ PIN incorrecto.");
+}
+function reportarFalsa(id,rCount,tLat,tLng){
+  if(!confirm("¿Reportar como falsa? Debes estar a menos de 50m del lugar."))return;
+  ejecutarAccionConGPS(tLat,tLng,()=>{
+    const n=rCount+1, payload={reportesCount:n}; if(n>=3)payload.desactivado=true;
+    if(firebaseActivo) referenciaSolicitudes.child(id).update(payload);
+    else{const item=listaGlobalPublicaciones.find(p=>String(p.id)===String(id));if(item){item.reportesCount=n;if(n>=3)item.desactivado=true;localStorage.setItem('solicitudesDemoV17',JSON.stringify(listaGlobalPublicaciones));aplicarFiltrosYOrden();}}
+    alert("Reporte registrado. ¡Gracias por cuidar la información!");
+  });
+}
+function alternarTipoAyuda(id,tipo,activo){
+  const upd=(activos,inactivos)=>{ if(activo){activos=activos.filter(t=>t!==tipo);if(!inactivos.includes(tipo))inactivos.push(tipo);}else{inactivos=inactivos.filter(t=>t!==tipo);if(!activos.includes(tipo))activos.push(tipo);} return[activos,inactivos]; };
+  if(firebaseActivo){ referenciaSolicitudes.child(id).once('value',s=>{const d=s.val();if(!d)return;const[a,i]=upd(d.tiposActivos||[],d.tiposInactivos||[]);referenciaSolicitudes.child(id).update({tiposActivos:a,tiposInactivos:i});}); }
+  else{const item=listaGlobalPublicaciones.find(p=>String(p.id)===String(id));if(item){const[a,i]=upd(item.tiposActivos||[],item.tiposInactivos||[]);item.tiposActivos=a;item.tiposInactivos=i;localStorage.setItem('solicitudesDemoV17',JSON.stringify(listaGlobalPublicaciones));aplicarFiltrosYOrden();}}
+}
+function verificarSolicitud(id,vActual,tLat,tLng){
+  if(misVerificaciones.includes(String(id)))return;
+  ejecutarAccionConGPS(tLat,tLng,()=>{
+    const n=vActual+1;
+    if(firebaseActivo) referenciaSolicitudes.child(`${id}/verificaciones`).set(n).then(()=>{misVerificaciones.push(String(id));localStorage.setItem('misVerificaciones',JSON.stringify(misVerificaciones));});
+    else{const item=listaGlobalPublicaciones.find(p=>String(p.id)===String(id));if(item){item.verificaciones=n;misVerificaciones.push(String(id));localStorage.setItem('misVerificaciones',JSON.stringify(misVerificaciones));localStorage.setItem('solicitudesDemoV17',JSON.stringify(listaGlobalPublicaciones));aplicarFiltrosYOrden();}}
+    alert("✅ Validación en terreno registrada. ¡Gracias!");
+  });
+}
+function guardarSolicitud(e){
+  e.preventDefault();
+  const btn=document.getElementById('btnEnviar2'); btn.disabled=true; btn.textContent="Guardando…";
+  const editId=document.getElementById('editId').value;
+  const lat=parseFloat(document.getElementById('campoLatitud').value), lng=parseFloat(document.getElementById('campoLongitud').value);
+  if(isNaN(lat)||isNaN(lng)){alert("Haz doble toque en el mapa para ubicar el punto.");btn.disabled=false;btn.textContent="Publicar";return;}
+  const modalidad=document.querySelector('input[name="campoModalidad"]:checked').value;
+  const chks=Array.from(document.querySelectorAll('.chk-tipo:checked')).map(c=>c.value);
+  const tiposActivos=chks.length?chks:["Necesidad general"];
+  const chkOtro=document.getElementById('chkOtro');
+  const otroDetalle=(chkOtro&&chkOtro.checked)?document.getElementById('campoOtroDetalle').value.trim():"";
+  let ubic=document.getElementById('campoUbicacion').value.trim()||`Punto en mapa (${lat.toFixed(3)}, ${lng.toFixed(3)})`;
+  const payload={modalidad,ubicacion:ubic,tiposActivos,prioridad:document.getElementById('campoPrioridad').value,descripcion:document.getElementById('campoDescripcion').value,lat,lng,contacto:document.getElementById('campoContacto').value.trim(),pin:document.getElementById('campoPin').value,imagen:imagenBase64Actual,otroDetalle};
+  if(editId){
+    if(firebaseActivo) referenciaSolicitudes.child(editId).update(payload).then(()=>finalizarConExito(lat,lng));
+    else{const i=listaGlobalPublicaciones.findIndex(p=>String(p.id)===String(editId));if(i!==-1){listaGlobalPublicaciones[i]={...listaGlobalPublicaciones[i],...payload};localStorage.setItem('solicitudesDemoV17',JSON.stringify(listaGlobalPublicaciones));aplicarFiltrosYOrden();finalizarConExito(lat,lng);}}
+  }else{
+    payload.verificaciones=1; payload.reportesCount=0; payload.tiposInactivos=[]; payload.fechaCreacion=Date.now();
+    if(firebaseActivo&&referenciaSolicitudes){ referenciaSolicitudes.push().set(payload).then(()=>finalizarConExito(lat,lng)).catch(()=>guardarEnLocal(payload)); }
+    else guardarEnLocal(payload);
+  }
+}
+function guardarEnLocal(payload){
+  payload.id=String(Date.now());
+  listaGlobalPublicaciones.push(payload);
+  localStorage.setItem('solicitudesDemoV17',JSON.stringify(listaGlobalPublicaciones));
+  aplicarFiltrosYOrden();
+  finalizarConExito(payload.lat,payload.lng);
+}
+function finalizarConExito(lat,lng){
+  const btn=document.getElementById('btnEnviar2'); btn.disabled=false; btn.textContent="Publicar";
+  cerrarFormulario();
+  if(marcadorPicker){mapa.removeLayer(marcadorPicker);marcadorPicker=null;}
+  go('mapa-sec'); setTimeout(()=>mapa.setView([lat,lng],16),250);
+  alert("✅ ¡Publicado! Gracias por ayudar. Recuerda que otros lo validarán en terreno.");
+}
+function activarAutocompletado(inputId,datalistId){
+  const input=document.getElementById(inputId), datalist=document.getElementById(datalistId); let t;
+  input.addEventListener('input',function(){clearTimeout(t);const txt=this.value.trim();if(txt.length<3)return;
+    t=setTimeout(async()=>{try{const res=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(txt)}&bbox=-79.0,0.0,-66.0,12.5&limit=5`);const d=await res.json();datalist.innerHTML='';d.features.forEach(f=>{const p=f.properties;const n=[p.name,p.street,p.city||p.county,p.state].filter(Boolean).join(', ');if(n){const o=document.createElement('option');o.value=n;datalist.appendChild(o);}});}catch(e){}},300);
+  });
+}
+activarAutocompletado('buscadorPrincipal','sugerenciasPrincipal');
+
+/* ═══════════ SHEET (guía, novedades, tablero, directorio, zonas) ═══════════ */
+const SEED={ actualizado:"13 de agosto, 9:40 a. m.",
+  novedades:[{hora:"Hoy 9:15",texto:"Se activó el subsidio de arriendo en Manizales; Pereira y Cali vienen en camino.",fuente:"Presidencia · verificado"},{hora:"Hoy 8:40",texto:"La Cruz Roja en Bogotá pide cajas grandes y cinta de embalaje.",fuente:"Cruz Roja · verificado"},{hora:"Ayer 7:10 p.m.",texto:"El Palacio de los Deportes recibe donaciones para Chocó, 8 a. m. a 8 p. m.",fuente:"Alcaldía de Bogotá · verificado"}],
+  necesidades:[{item:"Agua embotellada",estado:"si"},{item:"Pañales",estado:"si"},{item:"Gasas estériles",estado:"si"},{item:"Cajas y cinta",estado:"si"},{item:"Ropa usada",estado:"no"},{item:"Peluches",estado:"no"}],
+  personas:[], zonas:[] };
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function renderNovedades(items){
-  const html=items.map(n=>`<div class="feed-item"><span class="feed-hora">${esc(n.hora)}</span><div>${esc(n.texto)}<span class="ftag">Fuente: ${esc(n.fuente)}</span></div></div>`).join('');
-  document.getElementById('feed-full').innerHTML=html||'<p class="sub" style="margin:12px 0;">Sin novedades por ahora.</p>';
+  document.getElementById('feed-full').innerHTML=items.map(n=>`<div class="feed-item"><span class="feed-hora">${esc(n.hora)}</span><div>${esc(n.texto)}<span class="ftag">Fuente: ${esc(n.fuente)}</span></div></div>`).join('')||'<p class="sub">Sin novedades.</p>';
   document.getElementById('feed-home').innerHTML=items.slice(0,3).map(n=>`<div class="feed-item"><span class="feed-hora">${esc(n.hora)}</span><div>${esc(n.texto)}<span class="ftag">Fuente: ${esc(n.fuente)}</span></div></div>`).join('');
 }
-function renderNecesidades(items){
-  document.getElementById('tags-tablero').innerHTML=items.map(n=>`<span class="${n.estado==='si'?'t-si':'t-no'}">${esc(n.item)}</span>`).join('');
-}
+function renderNecesidades(items){ document.getElementById('tags-tablero').innerHTML=items.map(n=>`<span class="${n.estado==='si'?'t-si':'t-no'}">${esc(n.item)}</span>`).join(''); }
 function tarjetaPersona(p){
-  const badge=p.nivel==='prof'
-    ?`<span class="badge-v">✓ ${esc(p.badge||'Tarjeta profesional verificada')} · ${esc(p.fechaVerif||'')}</span>`
-    :`<span class="badge-c">◌ Contacto confirmado · ${esc(p.fechaVerif||'')}</span>`;
-  const pills=[
-    p.modalidad&&p.modalidad.toLowerCase().includes('internet')?'<span class="pill pill-online">💻 Por internet o teléfono</span>':(p.ciudad?`<span class="pill">📍 ${esc(p.ciudad)}</span>`:''),
-    p.modalidad&&p.modalidad.toLowerCase().includes('internet')?'<span class="pill">Atiende todo el país</span>':'',
-    p.cupos==='lleno'?'<span class="pill pill-lleno">Agenda llena esta semana</span>':(p.cupos?`<span class="pill pill-cupo">${esc(p.cupos)} espacios libres esta semana</span>`:'')
-  ].join('');
+  const badge=p.nivel==='prof'?`<span class="badge-v">✓ ${esc(p.badge||'Tarjeta profesional verificada')} · ${esc(p.fechaVerif||'')}</span>`:`<span class="badge-c">◌ Contacto confirmado · ${esc(p.fechaVerif||'')}</span>`;
+  const online=p.modalidad&&p.modalidad.toLowerCase().includes('internet');
+  const pills=[online?'<span class="pill pill-online">💻 Por internet</span>':(p.ciudad?`<span class="pill">📍 ${esc(p.ciudad)}</span>`:''),online?'<span class="pill">Atiende todo el país</span>':'',p.cupos==='lleno'?'<span class="pill pill-lleno">Agenda llena</span>':(p.cupos?`<span class="pill pill-cupo">${esc(p.cupos)} espacios libres</span>`:'')].join('');
   const horarios=p.horarios?`<div class="horarios">${esc(p.horarios).split(',').map(h=>`<span>${h.trim()}</span>`).join('')}</div>`:'';
-  const nota=p.nota?`<p class="desc" style="font-size:.83rem; color:var(--gris);">${esc(p.nota)}</p>`:'';
-  const msg=encodeURIComponent(`Hola, ${p.nombre}. Vi tu perfil en Brújula Colombia y quisiera pedir uno de tus espacios de ayuda. ¿Cuál hora te sirve?`);
-  const cta=(p.cupos==='lleno')
-    ?`<button class="btn btn-suave" disabled>Agenda llena — vuelve pronto</button>`
-    :(p.contacto?`<a class="btn btn-suave" href="https://wa.me/57${esc(String(p.contacto).replace(/\D/g,''))}?text=${msg}" target="_blank" rel="noopener">💬 Escribirle por WhatsApp</a>`:'');
-  return `<div class="persona">
-    <div class="cab"><span class="avatar" aria-hidden="true">${esc((p.nombre||'?')[0])}</span>
-    <div><h4>${esc(p.nombre)} · ${esc(p.rol)}</h4><span class="rol">${esc(p.descripcion||'')}</span></div></div>
-    ${badge}<p class="desc">${pills}</p>${horarios}${nota}${cta}</div>`;
+  const nota=p.nota?`<p class="desc" style="font-size:.83rem;color:var(--gris);">${esc(p.nota)}</p>`:'';
+  const msg=encodeURIComponent(`Hola, ${p.nombre}. Vi tu perfil en Brújula Colombia y quisiera pedir un espacio de ayuda.`);
+  const cta=p.cupos==='lleno'?`<button class="btn btn-suave" disabled>Agenda llena</button>`:(p.contacto?`<a class="btn btn-suave" href="https://wa.me/57${esc(String(p.contacto).replace(/[^0-9]/g,''))}?text=${msg}" target="_blank">💬 Escribirle por WhatsApp</a>`:'');
+  return `<div class="persona"><div class="cab"><span class="avatar">${esc((p.nombre||'?')[0])}</span><div><h4>${esc(p.nombre)} · ${esc(p.rol)}</h4><span class="rol">${esc(p.descripcion||'')}</span></div></div>${badge}<p class="desc">${pills}</p>${horarios}${nota}${cta}</div>`;
 }
 function renderPersonas(items){
   const prof=items.filter(p=>p.nivel==='prof'), gral=items.filter(p=>p.nivel!=='prof');
-  document.getElementById('lista-prof').innerHTML=prof.length?prof.map(tarjetaPersona).join(''):'<p class="sub">Estamos verificando los primeros perfiles. Vuelve pronto o sé el primero en ofrecerte. 💙</p>';
-  document.getElementById('lista-gral').innerHTML=gral.length?gral.map(tarjetaPersona).join(''):'<p class="sub">Aún no hay ofertas en esta categoría.</p>';
+  document.getElementById('lista-prof').innerHTML=prof.length?prof.map(tarjetaPersona).join(''):'<p class="sub">Estamos verificando los primeros perfiles. 💙</p>';
+  document.getElementById('lista-gral').innerHTML=gral.length?gral.map(tarjetaPersona).join(''):'<p class="sub">Aún no hay ofertas aquí.</p>';
 }
 function renderZonas(items){
   const cont=document.getElementById('lista-zonas'), sel=document.getElementById('sel-ciudades');
-  if(!items.length){sel.innerHTML=''; cont.innerHTML='<p class="sub">Aún no hay reportes de zonas. Vuelve pronto.</p>'; return;}
+  if(!items.length){sel.innerHTML='';cont.innerHTML='<p class="sub">Aún no hay reportes de zonas.</p>';return;}
   const ciudades=[...new Set(items.map(z=>z.ciudad))];
-  sel.innerHTML=ciudades.map((c,i)=>`<button class="${i===0?'on':''}" data-ciu="${esc(c)}">${esc(c)}</button>`).join('');
-  const pinta=ciudad=>{
-    const sem={rojo:'🔴',ambar:'🟡',verde:'🟢'}, cls={rojo:'estado-rojo',ambar:'estado-ambar',verde:'estado-verde'}, lbl={rojo:'EVITAR',ambar:'PRECAUCIÓN',verde:'OPERANDO'};
-    cont.innerHTML=items.filter(z=>z.ciudad===ciudad).map(z=>`<div class="zona-fila"><span class="sem" aria-hidden="true">${sem[z.estado]||'🟡'}</span><div><b>${esc(z.lugar)}</b> <span class="${cls[z.estado]||'estado-ambar'}">${lbl[z.estado]||''}</span><p>${esc(z.detalle||'')}</p><span class="ftag">${esc(z.reportadoPor||'')} · ${esc(z.fechaHora||'')}</span></div></div>`).join('');
-  };
-  sel.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
-    sel.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); pinta(b.dataset.ciu);
-  }));
+  sel.innerHTML=ciudades.map((c,i)=>`<button class="${i===0?'on':''}" data-ciu="${esc(c)}" style="flex-shrink:0;min-height:44px;border-radius:22px;border:1.5px solid var(--linea);background:${i===0?'var(--azul)':'#fff'};color:${i===0?'#fff':'var(--gris)'};padding:8px 16px;font-size:.88rem;font-weight:700;">${esc(c)}</button>`).join('');
+  const sem={rojo:'🔴',ambar:'🟡',verde:'🟢'},cls={rojo:'estado-rojo',ambar:'estado-ambar',verde:'estado-verde'},lbl={rojo:'EVITAR',ambar:'PRECAUCIÓN',verde:'OPERANDO'};
+  const pinta=ciudad=>{cont.innerHTML=items.filter(z=>z.ciudad===ciudad).map(z=>`<div class="zona-fila" style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--linea);border-radius:14px;background:#fff;margin-bottom:10px;"><span style="font-size:1.1rem;">${sem[z.estado]||'🟡'}</span><div><b>${esc(z.lugar)}</b> <span class="${cls[z.estado]||'estado-ambar'}" style="font-weight:700;font-size:.8rem;">${lbl[z.estado]||''}</span><p style="font-size:.88rem;color:var(--gris);">${esc(z.detalle||'')}</p><span style="font-size:.75rem;color:var(--gris);display:block;margin-top:3px;">${esc(z.reportadoPor||'')} · ${esc(z.fechaHora||'')}</span></div></div>`).join('');};
+  sel.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{sel.querySelectorAll('button').forEach(x=>{x.style.background='#fff';x.style.color='var(--gris)';});b.style.background='var(--azul)';b.style.color='#fff';pinta(b.dataset.ciu);}));
   pinta(ciudades[0]);
 }
 function renderTodo(d){
-  if(d.actualizado){document.getElementById('fecha-actualizacion').textContent='Información revisada: '+d.actualizado; document.getElementById('pie-fecha').textContent='Última revisión general: '+d.actualizado+'.';}
-  renderNovedades(d.novedades||[]); renderNecesidades(d.necesidades||[]);
-  renderPersonas(d.personas||[]); renderZonas(d.zonas||[]);
+  if(d.actualizado){document.getElementById('fecha-actualizacion').textContent='Información revisada: '+d.actualizado;document.getElementById('pie-fecha').textContent='Última revisión general: '+d.actualizado+'.';}
+  renderNovedades(d.novedades||[]);renderNecesidades(d.necesidades||[]);renderPersonas(d.personas||[]);renderZonas(d.zonas||[]);
 }
 renderTodo(SEED);
-async function cargarDatos(){
-  if(!CONFIG.API_URL || CONFIG.API_URL.startsWith('PEGA')) return;
-  try{
-    const r=await fetch(CONFIG.API_URL+'?v='+Date.now());
-    const d=await r.json();
-    renderTodo({...SEED,...d});
-  }catch(e){ console.warn('No se pudo cargar del Sheet, usando datos locales.', e); }
-}
-cargarDatos();
+(async function(){ if(!CONFIG.API_URL||CONFIG.API_URL.startsWith('PEGA'))return;
+  try{const r=await fetch(CONFIG.API_URL+'?v='+Date.now());const d=await r.json();renderTodo({...SEED,...d});}catch(e){console.warn('Sheet no disponible, usando semilla.',e);}
+})();
 
-/* ---------- Envío de formularios ---------- */
-async function enviar(datos){
-  if(!CONFIG.API_URL || CONFIG.API_URL.startsWith('PEGA')) throw new Error('API sin configurar');
-  await fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(datos)});
-}
+/* Envío formulario voluntarios → Sheet */
+async function enviarSheet(datos){ if(!CONFIG.API_URL||CONFIG.API_URL.startsWith('PEGA'))throw new Error('sin API'); await fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(datos)}); }
 document.querySelectorAll('.rama button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.rama button').forEach(x=>{x.classList.toggle('on',x===b); x.setAttribute('aria-checked',x===b);});
+  document.querySelectorAll('.rama button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b);});
   const esProf=b.dataset.rama==='prof';
   document.querySelectorAll('[data-solo="prof"]').forEach(c=>c.style.display=esProf?'block':'none');
   document.querySelectorAll('[data-solo="gral"]').forEach(c=>c.style.display=esProf?'none':'block');
 }));
-const v=id=>document.getElementById(id)?.value.trim()||'';
+const vv=id=>document.getElementById(id)?.value.trim()||'';
 document.getElementById('btn-enviar').addEventListener('click',async()=>{
   const err=document.getElementById('err-persona'); err.classList.remove('on');
   const esProf=document.querySelector('.rama button.on').dataset.rama==='prof';
-  if(!v('f-nombre')||!v('f-contacto')||(esProf&&(!v('f-cedula')||!v('f-prof')))||(!esProf&&!v('f-tipo'))){
-    err.textContent='Por favor completa los campos marcados con *.'; err.classList.add('on'); return;
-  }
-  if(!document.getElementById('f-consent').checked){
-    err.textContent='Necesitamos tu autorización (la casilla de la Ley 1581) para poder publicar tu contacto.'; err.classList.add('on'); return;
-  }
-  const btn=document.getElementById('btn-enviar'); btn.disabled=true; btn.textContent='Enviando…';
-  try{
-    await enviar({tipo:'persona', rama:esProf?'prof':'gral', nombre:v('f-nombre'), cedula:esProf?v('f-cedula'):'', profesion:esProf?v('f-prof'):v('f-tipo'), modalidad:v('f-modo'), ciudad:v('f-ciudad'), disponibilidad:v('f-disp'), cupos:v('f-cupos'), contacto:v('f-contacto'), consentimiento:'SI'});
-    document.getElementById('form-persona').style.display='none';
-    document.querySelector('#rform .rama').style.display='none';
-    document.getElementById('conf').classList.add('on');
-    document.getElementById('conf').scrollIntoView({behavior:'smooth'});
-  }catch(e){ err.textContent='No pudimos enviar tu formulario. Inténtalo de nuevo en un momento.'; err.classList.add('on'); btn.disabled=false; btn.textContent='Enviar mi ofrecimiento'; }
-});
-document.getElementById('btn-org').addEventListener('click',async()=>{
-  const err=document.getElementById('err-punto'); err.classList.remove('on');
-  if(!v('o-nombre')||!v('o-dir')||!v('o-contacto')||!v('o-si')||!v('o-no')){
-    err.textContent='Por favor completa los campos marcados con *.'; err.classList.add('on'); return;
-  }
-  const btn=document.getElementById('btn-org'); btn.disabled=true; btn.textContent='Enviando…';
-  try{
-    await enviar({tipo:'punto', nombre:v('o-nombre'), direccion:v('o-dir'), contacto:v('o-contacto'), necesitan:v('o-si'), yaNo:v('o-no'), perfiles:v('o-prof')});
-    document.getElementById('form-punto').style.display='none';
-    document.getElementById('conf-org').classList.add('on');
-    document.getElementById('conf-org').scrollIntoView({behavior:'smooth'});
-  }catch(e){ err.classList.add('on'); btn.disabled=false; btn.textContent='Enviar reporte'; }
+  if(!vv('f-nombre')||!vv('f-contacto')||(esProf&&(!vv('f-cedula')||!vv('f-prof')))||(!esProf&&!vv('f-tipo'))){err.textContent='Completa los campos con *.';err.classList.add('on');return;}
+  if(!document.getElementById('f-consent').checked){err.textContent='Necesitamos tu autorización (Ley 1581) para publicar tu contacto.';err.classList.add('on');return;}
+  const btn=document.getElementById('btn-enviar');btn.disabled=true;btn.textContent='Enviando…';
+  try{ await enviarSheet({tipo:'persona',rama:esProf?'prof':'gral',nombre:vv('f-nombre'),cedula:esProf?vv('f-cedula'):'',profesion:esProf?vv('f-prof'):vv('f-tipo'),modalidad:vv('f-modo'),disponibilidad:vv('f-disp'),contacto:vv('f-contacto'),consentimiento:'SI'});
+    document.getElementById('form-persona').style.display='none'; document.querySelector('#rform .rama').style.display='none';
+    document.getElementById('conf').classList.add('on'); document.getElementById('conf').scrollIntoView({behavior:'smooth'});
+  }catch(e){err.textContent='No pudimos enviar. Intenta de nuevo.';err.classList.add('on');btn.disabled=false;btn.textContent='Enviar mi ofrecimiento';}
 });
 document.querySelectorAll('[data-copia]').forEach(b=>b.addEventListener('click',()=>{
-  navigator.clipboard && navigator.clipboard.writeText(b.dataset.copia);
-  const orig=b.textContent; b.textContent='✅ ¡Copiado!'; setTimeout(()=>b.textContent=orig,1800);
+  navigator.clipboard&&navigator.clipboard.writeText(b.dataset.copia);
+  const o=b.textContent;b.textContent='✅ ¡Copiado!';setTimeout(()=>b.textContent=o,1800);
 }));
 </script>
+
+<!-- ═══ MODAL: Formulario del mapa ═══ -->
+<div id="modalFormulario" class="modal">
+  <div class="modal-box">
+    <button class="modal-cerrar" onclick="cerrarFormulario()">&times;</button>
+    <h3 id="tituloModal">Publicar ayuda</h3>
+    <p style="font-size:.82rem;color:var(--gris);margin-bottom:8px;">Ubicación tomada del mapa. Completa los detalles.</p>
+    <form id="formularioAyuda" onsubmit="guardarSolicitud(event)">
+      <input type="hidden" id="editId" value="">
+      <div class="campo">
+        <label>Tipo de registro</label>
+        <div class="radio-modo">
+          <label class="nec"><input type="radio" name="campoModalidad" value="necesita" checked> 🔴 Se necesita</label>
+          <label class="ofr"><input type="radio" name="campoModalidad" value="ofrece"> 🟢 Se ofrece</label>
+        </div>
+      </div>
+      <div class="campo">
+        <label>📷 Foto o flyer (opcional)</label>
+        <input type="file" id="campoImagen" accept="image/*" onchange="procesarImagen(event)">
+        <div id="containerPreview" class="preview-wrap" style="display:none;"><img id="previewImagen"><button type="button" onclick="quitarImagen()">✕</button></div>
+      </div>
+      <div class="campo"><label>Ubicación / referencia <span style="font-weight:400;color:var(--gris);">(opcional)</span></label><input type="text" id="campoUbicacion" list="sugerenciasFormulario" placeholder="Ej.: Vereda El Tambo, sector La Cancha"><datalist id="sugerenciasFormulario"></datalist></div>
+      <div class="campo">
+        <label>Tipos de ayuda (elige varios)</label>
+        <div class="chk-lista">
+          <label><input type="checkbox" name="tiposAyuda" value="🥣 Alimentos y Agua Potable" class="chk-tipo"> 🥣 Alimentos y Agua</label>
+          <label><input type="checkbox" name="tiposAyuda" value="💊 Insumos Médicos y Salud" class="chk-tipo"> 💊 Insumos Médicos</label>
+          <label><input type="checkbox" name="tiposAyuda" value="🙋‍♂️ Trabajo Voluntario / Mano de Obra" class="chk-tipo"> 🙋‍♂️ Voluntariado</label>
+          <label><input type="checkbox" name="tiposAyuda" value="⛺ Albergue, Carpas y Colchonetas" class="chk-tipo"> ⛺ Albergue y Carpas</label>
+          <label><input type="checkbox" name="tiposAyuda" value="🚜 Herramientas y Remoción" class="chk-tipo"> 🚜 Herramientas</label>
+          <label style="border-top:1px solid var(--linea);margin-top:4px;padding-top:8px;"><input type="checkbox" id="chkOtro" name="tiposAyuda" value="💡 Otro (Donaciones, Apoyo, etc.)" class="chk-tipo" onchange="toggleOtroDetalle()"> 💡 Otro (donaciones, apoyo psicosocial…)</label>
+        </div>
+        <div id="containerOtroDetalle" style="display:none;margin-top:8px;background:var(--ambar-luz);border-radius:12px;padding:12px;">
+          <label style="font-size:.82rem;font-weight:700;color:var(--ambar);">Detalle de "Otro" y/o contacto</label>
+          <textarea id="campoOtroDetalle" rows="2" placeholder="Ej.: Atención psicológica gratuita por WhatsApp…" style="width:100%;border:1px solid var(--linea);border-radius:10px;padding:10px;margin-top:6px;font-family:inherit;"></textarea>
+        </div>
+      </div>
+      <div class="campo"><label>Nivel de urgencia</label><select id="campoPrioridad" required><option value="Alta">🚨 Alta / crítica</option><option value="Media" selected>🟧 Media</option><option value="Baja">🟩 Baja / oferta</option></select></div>
+      <div class="campo"><label>Descripción *</label><textarea id="campoDescripcion" rows="3" required placeholder="Especifica cantidades, necesidades puntuales, puntos de entrega…"></textarea></div>
+      <div class="campo"><label>WhatsApp de contacto <span style="font-weight:400;color:var(--gris);">(opcional)</span></label><input type="tel" id="campoContacto" placeholder="Ej.: 3001234567"></div>
+      <div class="campo"><label>🔐 PIN de 4 dígitos (para editar/borrar tu punto)</label><input type="password" id="campoPin" maxlength="4" pattern="[0-9]{4}" required placeholder="Ej.: 1234" style="letter-spacing:.3em;font-family:monospace;"></div>
+      <div class="campo"><label>Ubicación en el mapa</label><div class="coords"><input type="number" step="any" id="campoLatitud" readonly placeholder="Latitud"><input type="number" step="any" id="campoLongitud" readonly placeholder="Longitud"></div></div>
+      <button type="submit" id="btnEnviar2" class="btn btn-primario">Publicar</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ MODAL: visor de imagen ═══ -->
+<div id="modalImagenFull" onclick="cerrarImagenFull()"><img id="imgFullTarget" src="" alt="Imagen ampliada"></div>
+
 </body>
 </html>
