@@ -36,20 +36,27 @@ button:active, .btn:active, .ruta:active, .chip-filtro:active{transform:scale(.9
 
 header{background:linear-gradient(160deg,#14304F 0%,#1D4064 65%,#2C5788 100%); color:#fff; padding:20px 20px 18px; border-radius:0 0 26px 26px; position:relative; overflow:hidden;}
 header::after{content:""; position:absolute; top:-40px; right:-40px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%); pointer-events:none;}
-.brand{display:flex; align-items:center; gap:12px;}
-.logo{width:46px; height:46px; border-radius:15px; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; font-size:23px; flex-shrink:0; border:1px solid rgba(255,255,255,.25); box-shadow:0 4px 14px rgba(0,0,0,.15); overflow:hidden;}
+.brand{display:flex; align-items:center; gap:12px; cursor:pointer; user-select:none;}
+.logo{width:46px; height:46px; border-radius:15px; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(255,255,255,.25); box-shadow:0 4px 14px rgba(0,0,0,.15); overflow:hidden;}
+.logo svg, .logo img{width:100%; height:100%; object-fit:cover; display:block;}
 .brand h1{font-size:1.28rem; font-weight:700;}
 .brand small{display:block; font-family:'Atkinson Hyperlegible'; font-weight:400; font-size:.78rem; opacity:.82;}
-.updated{margin-top:10px; font-size:.78rem; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:5px 13px; display:inline-flex; align-items:center; gap:6px;}
+
+.header-top-row{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;}
+.header-shortcuts{display:flex; gap:6px; margin-top:8px; overflow-x:auto; padding-bottom:2px;}
+.header-btn{background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.25); border-radius:16px; padding:4px 10px; font-size:.76rem; font-weight:700; white-space:nowrap; display:inline-flex; align-items:center; gap:4px;}
+.header-btn:hover{background:rgba(255,255,255,.28);}
+
+.updated{margin-top:8px; font-size:.78rem; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); border-radius:20px; padding:4px 12px; display:inline-flex; align-items:center; gap:6px;}
 .dot{width:8px; height:8px; border-radius:50%; background:#7FD8A6; display:inline-block; animation:pulso 2s infinite ease-in-out;}
 .dot.amber{background:#FFC24B;}
 @keyframes pulso{0%,100%{opacity:1;} 50%{opacity:.4;}}
 .stats-header{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px; position:relative; z-index:1;}
-.stat-item{border-radius:14px; padding:10px 8px; text-align:center; border:none; font-family:inherit; width:100%; color:#fff;}
+.stat-item{border-radius:14px; padding:10px 8px; text-align:center; border:none; font-family:inherit; width:100%; color:#fff; cursor:pointer;}
 .stat-item b, .stat-item span{color:#fff;}
 .stat-item:active{transform:scale(.95);}
 .stat-item b{display:block; font-size:1.3rem; font-family:'Bricolage Grotesque'; line-height:1;}
-.stat-item span{display:block; font-size:.68rem; opacity:.85; margin-top:3px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;}
+.stat-item span{display:block; font-size:.68rem; opacity:.9; margin-top:3px; font-weight:700; text-transform:uppercase; letter-spacing:.02em;}
 
 nav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:var(--ancho-app); z-index:1200; transition:max-width .2s ease;
   display:flex; align-items:flex-end; background:rgba(255,255,255,.97); backdrop-filter:blur(12px);
@@ -57,8 +64,9 @@ nav{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; 
   padding:6px 4px calc(10px + env(safe-area-inset-bottom));}
 nav button{flex:1; min-height:54px; background:none; border:none; border-radius:14px; font-size:.64rem; font-weight:700; color:var(--gris); line-height:1.2; padding:6px 2px;}
 nav button .ico{display:block; font-size:1.2rem; margin-bottom:2px;}
-nav button .ico-img{width:22px; height:22px; margin:0 auto 3px; border-radius:7px; overflow:hidden;}
-nav button.mapa-tab .ico-img{width:26px; height:26px;}
+nav button .ico-svg{width:22px; height:22px; margin:0 auto 3px; border-radius:7px; overflow:hidden; display:flex; align-items:center; justify-content:center;}
+nav button .ico-svg svg{width:100%; height:100%; display:block;}
+nav button.mapa-tab .ico-svg{width:26px; height:26px;}
 nav button.active{color:var(--azul); background:var(--azul-bruma);}
 nav button.mapa-tab{flex:1.25; color:#fff; background:var(--azul); border-radius:18px; margin:0 4px; min-height:62px; box-shadow:0 4px 14px rgba(20,48,79,.3); transform:translateY(-8px);}
 nav button.mapa-tab .ico{font-size:1.4rem;}
@@ -145,16 +153,12 @@ section.visible{display:block; animation:fade .28s ease;}
 .tm-tipo.sangre{background:#FCE7EE; color:#B02362;}
 .tm-tipo.dinero{background:var(--verde-luz); color:var(--verde);}
 .tm-tipo.mascota{background:var(--ambar-luz); color:var(--ambar);}
-.tm-otro{background:var(--ambar-luz); border-radius:10px; padding:8px 12px; font-size:.82rem; color:var(--ambar); margin:8px 0; word-break:break-word; overflow-wrap:anywhere;}
 .tm-acciones{border-top:1px solid var(--linea); margin-top:10px; padding-top:10px; display:flex; flex-direction:column; gap:8px;}
 .tm-fila{display:flex; justify-content:space-between; align-items:center; font-size:.85rem;}
 .tm-wa{color:var(--verde); font-weight:700; text-decoration:none;}
 .tm-vermapa{color:var(--azul); font-weight:700; background:none; border:none; font-size:.85rem;}
 .btn-validar{width:100%; min-height:46px; border-radius:12px; border:none; font-size:.85rem; font-weight:700; background:var(--ambar); color:#fff;}
 .btn-validar:disabled{background:var(--verde-luz); color:var(--verde);}
-.tm-mini{display:flex; justify-content:space-between; align-items:center; font-size:.75rem; color:var(--gris); font-weight:700;}
-.tm-mini button{background:none; border:none; color:var(--gris); font-weight:700; font-size:.75rem;}
-.dist-badge{font-size:.72rem; font-weight:700; color:var(--azul-med); background:var(--azul-bruma); padding:2px 8px; border-radius:8px;}
 
 /* modales */
 .modal{display:none; position:fixed; inset:0; background:rgba(20,48,79,.55); backdrop-filter:blur(4px); z-index:2000; justify-content:center; align-items:flex-start; padding:20px 12px; overflow-y:auto;}
@@ -177,12 +181,6 @@ section.visible{display:block; animation:fade .28s ease;}
 .chk-lista input{width:20px; height:20px; accent-color:var(--azul);}
 .coords{display:grid; grid-template-columns:1fr 1fr; gap:8px; background:var(--fondo); border-radius:12px; padding:10px;}
 .coords input{background:#fff; font-family:monospace; font-size:.8rem; min-height:40px;}
-.preview-wrap{position:relative; margin-top:8px;}
-.preview-wrap img{width:100%; height:130px; object-fit:cover; border-radius:12px;}
-.preview-wrap button{position:absolute; top:6px; right:6px; background:var(--rojo); color:#fff; border:none; border-radius:50%; width:28px; height:28px; font-weight:700;}
-#modalImagenFull{display:none; position:fixed; inset:0; background:rgba(10,15,20,.9); z-index:3000; justify-content:center; align-items:center; padding:20px;}
-#modalImagenFull.on{display:flex;}
-#modalImagenFull img{max-width:100%; max-height:85vh; object-fit:contain; border-radius:12px;}
 
 .banner-seleccion{position:fixed; top:90px; left:50%; transform:translateX(-50%); z-index:2500; background:var(--azul); color:#fff; font-weight:700; font-size:.85rem; padding:12px 18px; border-radius:24px; box-shadow:0 8px 24px rgba(20,48,79,.4); display:none; align-items:center; gap:12px; max-width:90%;}
 .banner-seleccion.on{display:flex;}
@@ -196,9 +194,6 @@ section.visible{display:block; animation:fade .28s ease;}
 .tabla-centros tr.fila-centro:active{background:var(--azul-bruma);}
 .tabla-centros .dpto{display:block; font-size:.7rem; color:var(--gris); font-weight:400;}
 .badge-conteo{background:var(--rojo-luz); color:var(--rojo); border-radius:10px; font-size:.7rem; font-weight:800; padding:2px 8px;}
-.btn-duplicar{color:var(--azul-med); font-weight:700; font-size:.8rem; background:none; border:none;}
-.req-foto{color:var(--rojo); font-size:.75rem; font-weight:700;}
-.sync-tag{font-size:.72rem; color:var(--gris); font-style:italic; text-align:center; padding-top:8px; border-top:1px solid var(--linea); margin-top:8px;}
 
 /* acordeones y guías */
 details.paso{background:var(--blanco); border:1px solid var(--linea); border-radius:var(--r); margin:10px 18px; overflow:hidden; box-shadow:var(--sombra);}
@@ -237,8 +232,6 @@ details.paso[open] summary .mas{transform:rotate(45deg);}
 .persona h4{font-size:1.05rem;}
 .persona .rol{font-size:.85rem; color:var(--gris);}
 .persona .desc{font-size:.92rem; margin:8px 0;}
-.horarios{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
-.horarios span{background:var(--verde-luz); color:var(--verde); border-radius:10px; padding:5px 10px; font-size:.8rem; font-weight:700;}
 .feed-item{display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--linea); font-size:.92rem;}
 .feed-item:last-of-type{border-bottom:none;}
 .feed-hora{flex-shrink:0; background:var(--azul-bruma); color:var(--azul); border-radius:10px; padding:4px 9px; font-size:.75rem; font-weight:700; height:fit-content; white-space:nowrap;}
@@ -250,8 +243,10 @@ details.paso[open] summary .mas{transform:rotate(45deg);}
 .chip-e{flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:100px; min-height:64px; background:#fff; border:none; box-shadow:0 2px 8px rgba(163,34,34,.15); border-radius:14px; padding:8px 12px; text-decoration:none; color:var(--rojo);}
 .chip-e b{font-size:1.15rem; font-family:'Bricolage Grotesque';}
 .chip-e span{font-size:.72rem; font-weight:700; text-align:center;}
+
 .ruta{display:flex; gap:14px; align-items:center; background:var(--blanco); border:1px solid var(--linea); border-radius:var(--r); margin:12px 18px; padding:16px 18px; text-align:left; width:calc(100% - 36px); box-shadow:var(--sombra); border-left:5px solid var(--azul-med);}
-.ruta .ico-g{width:50px; height:50px; border-radius:16px; background:var(--azul-bruma); display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; overflow:hidden;}
+.ruta .ico-g{width:50px; height:50px; border-radius:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;}
+.ruta .ico-g svg, .ruta .ico-g img{width:100%; height:100%; object-fit:cover; display:block;}
 .ruta h2{font-size:1.08rem; color:var(--azul);}
 .ruta p{font-size:.87rem; color:var(--gris); margin-top:2px; font-family:'Atkinson Hyperlegible';}
 .ruta .flecha{margin-left:auto; color:var(--azul-med); font-size:1.4rem; flex-shrink:0;}
@@ -294,7 +289,6 @@ footer b{color:#FFD9A8;}
   
   nav { max-width: 680px; border-radius: 24px; bottom: 20px; box-shadow: 0 10px 35px rgba(20,48,79,.2); padding: 8px 12px; }
   
-  /* GRID PRINCIPAL DEL MAPA (2 COLUMNAS) */
   .desktop-mapa-grid {
     display: grid;
     grid-template-columns: 440px 1fr;
@@ -309,34 +303,22 @@ footer b{color:#FFD9A8;}
     flex-direction: column;
     gap: 12px;
   }
-  .desktop-mapa-lateral #mapa {
-    width: 100%;
-    margin: 0;
-    height: 440px;
-  }
+  .desktop-mapa-lateral #mapa { width: 100%; margin: 0; height: 440px; }
   .desktop-mapa-lateral .buscador-wrap,
   .desktop-mapa-lateral .tip-mapa,
   .desktop-mapa-lateral .leyenda-mapa,
   .desktop-mapa-lateral .acciones-mapa,
-  .desktop-mapa-lateral .tabla-centros {
-    margin: 0;
-    width: 100%;
-  }
+  .desktop-mapa-lateral .tabla-centros { margin: 0; width: 100%; }
   
   .desktop-mapa-contenido .chips-rapidos,
-  .desktop-mapa-contenido .filtros {
-    margin: 0 0 12px 0;
-  }
+  .desktop-mapa-contenido .filtros { margin: 0 0 12px 0; }
   .desktop-mapa-contenido #contenedorTarjetas {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
-  .desktop-mapa-contenido #contenedorTarjetas .tm-card {
-    margin: 0;
-  }
+  .desktop-mapa-contenido #contenedorTarjetas .tm-card { margin: 0; }
   
-  /* HOME DESKTOP (Grillas de 2 y 3 columnas) */
   .desktop-home-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -345,7 +327,6 @@ footer b{color:#FFD9A8;}
   }
   .desktop-home-grid > * { margin: 0!important; width: 100%!important; }
   
-  /* GUIAS / PASOS (2 COLUMNAS) */
   .desktop-pasos-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -354,7 +335,6 @@ footer b{color:#FFD9A8;}
   }
   .desktop-pasos-grid details.paso { margin: 0; }
   
-  /* DONACIONES Y VOLUNTARIOS */
   .desktop-cards-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -393,16 +373,43 @@ footer b{color:#FFD9A8;}
 <div class="app">
 <a class="skip" href="#contenido">Saltar al contenido</a>
 
+<!-- ════════════ HEADER CON NAVEGACIÓN Y STATS CLICKEABLES ════════════ -->
 <header>
-  <div class="brand">
-    <div class="logo" aria-hidden="true">🇨🇴</div>
-    <h1>Brújula Colombia<small>Mapa de ayuda e información verificada</small></h1>
+  <div class="header-top-row">
+    <div class="brand" onclick="go('home')" title="Ir al Inicio">
+      <div class="logo" aria-hidden="true">
+        <!-- Ícono Brújula Colombia (Estrella brújula) -->
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="48" fill="#F4EFE6"/>
+          <circle cx="50" cy="50" r="44" fill="none" stroke="#14304F" stroke-width="7"/>
+          <path d="M50 14 L59 41 L86 50 L59 59 L50 86 L41 59 L14 50 L41 41 Z" fill="#14304F"/>
+          <path d="M50 6 A44 44 0 0 1 84 22" fill="none" stroke="#B23A3A" stroke-width="7"/>
+          <path d="M84 78 A44 44 0 0 1 50 94" fill="none" stroke="#B23A3A" stroke-width="7"/>
+          <path d="M16 78 A44 44 0 0 1 6 50" fill="none" stroke="#E5A922" stroke-width="7"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Brújula Colombia</h1>
+        <small>Mapa de ayuda e información verificada</small>
+      </div>
+    </div>
+    <span class="updated"><span class="dot" id="dot-estado" aria-hidden="true"></span> <span id="fecha-actualizacion">Información revisada: en vivo</span></span>
   </div>
-  <span class="updated"><span class="dot" id="dot-estado" aria-hidden="true"></span> <span id="fecha-actualizacion">Información revisada: en vivo</span></span>
+
+  <!-- Accesos rápidos circulares en Header -->
+  <div class="header-shortcuts" role="navigation" aria-label="Accesos rápidos">
+    <button class="header-btn" onclick="go('home')">🏠 Inicio</button>
+    <button class="header-btn" onclick="go('ahora'); document.querySelectorAll('#ahora .subpane').forEach(p=>p.classList.toggle('on',p.id==='segn-n1'));">📰 Novedades</button>
+    <button class="header-btn" onclick="go('ahora'); document.querySelectorAll('#ahora .subpane').forEach(p=>p.classList.toggle('on',p.id==='segn-n2'));">🚧 Estado de vías</button>
+    <button class="header-btn" onclick="go('r1')">🆘 Necesito ayuda</button>
+    <button class="header-btn" onclick="go('r2')">💛 Donar</button>
+  </div>
+
+  <!-- Stats Header Clickeables -->
   <div class="stats-header">
-    <button class="stat-item glass" data-stat="necesita" type="button"><b id="stat-necesita">—</b><span>🔴 Necesitan</span></button>
-    <button class="stat-item glass" data-stat="ofrece" type="button"><b id="stat-ofrece">—</b><span>🟢 Ofrecen</span></button>
-    <button class="stat-item glass" data-stat="validados" type="button"><b id="stat-validados">—</b><span>✅ Validados</span></button>
+    <button class="stat-item glass" data-stat="necesita" type="button" title="Ver sólo necesidades en el mapa"><b id="stat-necesita">—</b><span>🔴 Necesitan</span></button>
+    <button class="stat-item glass" data-stat="ofrece" type="button" title="Ver sólo ofertas en el mapa"><b id="stat-ofrece">—</b><span>🟢 Ofrecen</span></button>
+    <button class="stat-item glass" data-stat="validados" type="button" title="Ver reportes verificados en terreno"><b id="stat-validados">—</b><span>✅ Validados</span></button>
   </div>
 </header>
 
@@ -416,6 +423,7 @@ footer b{color:#FFD9A8;}
     <div style="display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap;">
       <span class="estado-con" id="estadoConexion">🟡 Conectando…</span>
       <button class="ayuda" onclick="abrirFuentes()" style="min-height:32px; padding:5px 12px;">ℹ️ Fuentes</button>
+      <button class="ayuda" onclick="go('ahora')" style="min-height:32px; padding:5px 12px; background:var(--ambar-luz); color:var(--ambar);">🚧 Ver estado de vías</button>
     </div>
   </div>
   <div class="banner-seleccion" id="bannerSeleccionMapa"><span>📍 Doble toque en el mapa para fijar el punto.</span><button onclick="cancelarSeleccionMapa()">✕ Cancelar</button></div>
@@ -456,6 +464,7 @@ footer b{color:#FFD9A8;}
         <button class="chip-filtro on" data-chip="todos" data-campo="cat">Todo</button>
         <button class="chip-filtro" data-chip="necesita" data-campo="mod">🔴 Necesitan</button>
         <button class="chip-filtro" data-chip="ofrece" data-campo="mod">🟢 Ofrecen</button>
+        <button class="chip-filtro" data-chip="validados" data-campo="mod">✅ Validados</button>
         <button class="chip-filtro" data-chip="🥣 Alimentos y Agua Potable" data-campo="cat">🥣 Alimentos</button>
         <button class="chip-filtro" data-chip="💊 Insumos Médicos y Salud" data-campo="cat">💊 Médicos</button>
         <button class="chip-filtro" data-chip="🙋‍♂️ Trabajo Voluntario / Mano de Obra" data-campo="cat">🙋‍♂️ Voluntariado</button>
@@ -485,6 +494,7 @@ footer b{color:#FFD9A8;}
             <option value="todos">Todo</option>
             <option value="necesita">🔴 Necesidades</option>
             <option value="ofrece">🟢 Ofertas</option>
+            <option value="validados">✅ Solo validados</option>
           </select>
         </div>
         <div class="full">
@@ -530,26 +540,49 @@ footer b{color:#FFD9A8;}
     </div>
 
     <div style="display:flex; flex-direction:column; gap:12px;">
+      <!-- Ruta: Vías (Ícono Pin Ámbar) -->
       <button class="ruta" data-go="ahora" style="border-left-color:var(--ambar); margin:0;">
-        <span class="ico-g" aria-hidden="true" style="background:var(--ambar-luz);">🚧</span>
+        <span class="ico-g" aria-hidden="true" style="background:#E5A922;">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="42" r="22" fill="#14304F"/>
+            <path d="M50 68 L32 46 Q50 82 50 82 Q50 82 68 46 Z" fill="#14304F"/>
+            <circle cx="50" cy="42" r="9" fill="#E5A922"/>
+          </svg>
+        </span>
         <span><h2>Zonas y vías: cómo están hoy</h2><p>Estado de sectores y carreteras en las zonas afectadas.</p></span>
         <span class="flecha" aria-hidden="true">›</span>
       </button>
 
-      <button class="ruta" data-go="r1" style="margin:0;">
-        <span class="ico-g" aria-hidden="true">🆘</span>
+      <!-- Ruta: Necesito Ayuda (Ícono Corazón Cruz Médica) -->
+      <button class="ruta" data-go="r1" style="margin:0; border-left-color:var(--rojo);">
+        <span class="ico-g" aria-hidden="true" style="background:#B23A3A;">
+          <svg viewBox="0 0 100 100">
+            <path d="M50 82 C20 58 14 40 22 26 C30 12 44 16 50 25 C56 16 70 12 78 26 C86 40 80 58 50 82 Z" fill="#FFFFFF"/>
+            <path d="M46 36 H54 V46 H64 V54 H54 V64 H46 V54 H36 V46 H46 Z" fill="#B23A3A"/>
+          </svg>
+        </span>
         <span><h2>Necesito ayuda</h2><p>Registro, subsidios, mi casa, buscar a alguien, apoyo emocional.</p></span>
         <span class="flecha" aria-hidden="true">›</span>
       </button>
 
-      <button class="ruta" data-go="r2" style="margin:0;">
-        <span class="ico-g" aria-hidden="true">💛</span>
+      <!-- Ruta: Donar seguro (Ícono Corazón Verde) -->
+      <button class="ruta" data-go="r2" style="margin:0; border-left-color:var(--verde);">
+        <span class="ico-g" aria-hidden="true" style="background:#1B6B45;">
+          <svg viewBox="0 0 100 100">
+            <path d="M50 82 C20 58 14 40 22 26 C30 12 44 16 50 25 C56 16 70 12 78 26 C86 40 80 58 50 82 Z" fill="#FFFFFF"/>
+          </svg>
+        </span>
         <span><h2>Donar seguro y voluntarios</h2><p>Cuentas verificadas, qué se necesita hoy y personas que ayudan.</p></span>
         <span class="flecha" aria-hidden="true">›</span>
       </button>
 
-      <button class="ruta" data-go="rform" style="margin:0;">
-        <span class="ico-g" aria-hidden="true">🤝</span>
+      <!-- Ruta: Ofrezco ayuda (Ícono Brújula Estrella Azul) -->
+      <button class="ruta" data-go="rform" style="margin:0; border-left-color:var(--azul);">
+        <span class="ico-g" aria-hidden="true" style="background:#14304F;">
+          <svg viewBox="0 0 100 100">
+            <path d="M50 14 L60 40 L86 50 L60 60 L50 86 L40 60 L14 50 L40 40 Z" fill="#FFFFFF"/>
+          </svg>
+        </span>
         <span><h2>Ofrezco mi ayuda</h2><p>Psicólogos y profes por internet, ingenieros, transporte y más.</p></span>
         <span class="flecha" aria-hidden="true">›</span>
       </button>
@@ -754,12 +787,66 @@ footer b{color:#FFD9A8;}
   <span id="pie-fecha">Última revisión: en vivo.</span>
 </footer>
 
+<!-- ════════════ BARRA DE NAVEGACIÓN INFERIOR CON ÍCONOS RESTAURADOS ════════════ -->
 <nav aria-label="Secciones">
-  <button data-t="home"><span class="ico" aria-hidden="true">🏠</span>Inicio</button>
-  <button data-t="r1"><span class="ico" aria-hidden="true">🆘</span>Necesito<br>ayuda</button>
-  <button class="mapa-tab active" data-t="mapa-sec"><span class="ico" aria-hidden="true">🗺️</span>Mapa</button>
-  <button data-t="r2"><span class="ico" aria-hidden="true">💛</span>Donar</button>
-  <button data-t="rform"><span class="ico" aria-hidden="true">🤝</span>Ofrezco<br>ayuda</button>
+  <!-- Inicio: Ícono Estrella Brújula Marina -->
+  <button data-t="home">
+    <span class="ico ico-svg" aria-hidden="true">
+      <svg viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="26" fill="#14304F"/>
+        <path d="M50 16 L60 40 L84 50 L60 60 L50 84 L40 60 L16 50 L40 40 Z" fill="#FFFFFF"/>
+      </svg>
+    </span>
+    Inicio
+  </button>
+
+  <!-- Necesito ayuda: Ícono Corazón Cruz Médica -->
+  <button data-t="r1">
+    <span class="ico ico-svg" aria-hidden="true">
+      <svg viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="26" fill="#B23A3A"/>
+        <path d="M50 80 C24 58 18 42 25 28 C32 16 45 20 50 28 C55 20 68 16 75 28 C82 42 76 58 50 80 Z" fill="#FFFFFF"/>
+        <path d="M46 38 H54 V46 H62 V54 H54 V62 H46 V54 H38 V46 H46 Z" fill="#B23A3A"/>
+      </svg>
+    </span>
+    Necesito<br>ayuda
+  </button>
+
+  <!-- Mapa: Ícono Pin Ámbar -->
+  <button class="mapa-tab active" data-t="mapa-sec">
+    <span class="ico ico-svg" aria-hidden="true">
+      <svg viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="26" fill="#E5A922"/>
+        <circle cx="50" cy="42" r="20" fill="#14304F"/>
+        <path d="M50 68 L34 46 Q50 80 50 80 Q50 80 66 46 Z" fill="#14304F"/>
+        <circle cx="50" cy="42" r="8" fill="#E5A922"/>
+      </svg>
+    </span>
+    Mapa
+  </button>
+
+  <!-- Donar: Ícono Corazón Verde -->
+  <button data-t="r2">
+    <span class="ico ico-svg" aria-hidden="true">
+      <svg viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="26" fill="#1B6B45"/>
+        <path d="M50 78 C24 56 18 40 25 28 C32 16 45 20 50 28 C55 20 68 16 75 28 C82 40 76 56 50 78 Z" fill="#FFFFFF"/>
+      </svg>
+    </span>
+    Donar
+  </button>
+
+  <!-- Ofrezco ayuda: Ícono Voluntario / Solidaridad -->
+  <button data-t="rform">
+    <span class="ico ico-svg" aria-hidden="true">
+      <svg viewBox="0 0 100 100">
+        <rect width="100" height="100" rx="26" fill="#2C5788"/>
+        <circle cx="50" cy="34" r="16" fill="#FFFFFF"/>
+        <path d="M24 78 C24 60 36 54 50 54 C64 54 76 60 76 78 Z" fill="#FFFFFF"/>
+      </svg>
+    </span>
+    Ofrezco<br>ayuda
+  </button>
 </nav>
 </div>
 
@@ -825,7 +912,7 @@ function renderNecesidades(items) {
 }
 
 function tarjetaPersona(p) {
-  const badge = p.nivel === 'prof'
+  const badge = p.nivel === 'prof' || p.rama === 'prof'
     ? `<span class="badge-v">✓ ${esc(p.badge||'Tarjeta profesional verificada')}</span>`
     : `<span class="badge-c">◌ Contacto confirmado</span>`;
   const online = p.modalidad && p.modalidad.toLowerCase().includes('internet');
@@ -842,8 +929,25 @@ function renderPersonas(items) {
   const prof = (items||[]).filter(p => p.nivel === 'prof' || p.rama === 'prof');
   const gral = (items||[]).filter(p => p.nivel !== 'prof' && p.rama !== 'prof');
   const lp = document.getElementById('lista-prof'), lg = document.getElementById('lista-gral');
-  if (lp) lp.innerHTML = prof.length ? prof.map(tarjetaPersona).join('') : '<p class="sub">Estamos verificando los nuevos perfiles profesionales.</p>';
-  if (lg) lg.innerHTML = gral.length ? gral.map(tarjetaPersona).join('') : '<p class="sub">Pronto más voluntarios disponibles.</p>';
+  
+  const emptyStateProf = `
+    <div class="card" style="background:var(--azul-bruma); border:none; margin:8px 0; text-align:center; padding:22px; grid-column:1/-1;">
+      <span style="font-size:2rem; display:block; margin-bottom:6px;">🧑‍⚕️</span>
+      <b style="color:var(--azul); font-size:1.05rem;">Revisión en curso de profesionales</b>
+      <p style="font-size:.9rem; color:var(--gris); margin:6px 0 14px;">Estamos validando las tarjetas de médicos, psicólogos e ingenieros en los registros oficiales (ReTHUS, COPNIA) antes de publicarlos para tu seguridad.</p>
+      <button class="btn btn-primario" onclick="go('rform')" style="margin:0 auto; max-width:280px;">🙋‍♀️ Ofrecer mi ayuda profesional</button>
+    </div>`;
+
+  const emptyStateGral = `
+    <div class="card" style="background:#fff; border:1px dashed var(--linea); margin:8px 0; text-align:center; padding:20px; grid-column:1/-1;">
+      <span style="font-size:1.8rem; display:block; margin-bottom:4px;">🤲</span>
+      <b style="color:var(--azul); font-size:1rem;">Sé parte de la red de voluntarios</b>
+      <p style="font-size:.88rem; color:var(--gris); margin:6px 0 12px;">¿Puedes colaborar con transporte, refuerzo escolar o clasificación de donaciones?</p>
+      <button class="btn btn-suave" onclick="go('rform')" style="margin:0 auto; max-width:260px;">➕ Registrar mi ayuda</button>
+    </div>`;
+
+  if (lp) lp.innerHTML = prof.length ? prof.map(tarjetaPersona).join('') : emptyStateProf;
+  if (lg) lg.innerHTML = gral.length ? gral.map(tarjetaPersona).join('') : emptyStateGral;
 }
 
 function renderZonas(items) {
@@ -908,13 +1012,43 @@ renderTodo(SEED);
         ...SEED,
         ...(data.data || data),
         novedades: data.novedades || data.Novedades || data.noticias || (data.data && data.data.novedades),
-        zonas: data.zonas || data.Zonas || data.vias || (data.data && data.data.zonas)
+        zonas: data.zonas || data.Zonas || data.vias || (data.data && data.data.zonas),
+        personas: data.personas || data.Personas || (data.data && data.data.personas)
       });
     }
   } catch (err) {
     console.warn('Usando datos locales por falla en Sheets:', err);
   }
 })();
+
+/* ═══════════ ACCIÓN CLIC EN STATS DEL HEADER ═══════════ */
+document.querySelectorAll('.stat-item').forEach(b => b.addEventListener('click', () => {
+  const stat = b.dataset.stat;
+  go('mapa-sec');
+  setTimeout(() => {
+    const selMod = document.getElementById('filtroModalidad');
+    const selCat = document.getElementById('filtroCategoria');
+    if (!selMod || !selCat) return;
+
+    document.querySelectorAll('.chip-filtro').forEach(c => c.classList.remove('on'));
+
+    if (stat === 'necesita') {
+      selMod.value = 'necesita';
+      selCat.value = 'todos';
+      document.querySelector('.chip-filtro[data-chip="necesita"]')?.classList.add('on');
+    } else if (stat === 'ofrece') {
+      selMod.value = 'ofrece';
+      selCat.value = 'todos';
+      document.querySelector('.chip-filtro[data-chip="ofrece"]')?.classList.add('on');
+    } else if (stat === 'validados') {
+      selMod.value = 'validados';
+      selCat.value = 'todos';
+      document.querySelector('.chip-filtro[data-chip="validados"]')?.classList.add('on');
+    }
+    cambiarFiltro();
+    document.getElementById('contenedorTarjetas')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 250);
+}));
 
 /* ═══════════ FORMULARIOS DE REGISTRO ═══════════ */
 async function enviarSheet(datos){
@@ -1049,6 +1183,24 @@ if (mapa) {
 
 function cambiarFiltro() { paginaActual = 1; aplicarFiltrosYOrden(); }
 
+// Manejo de Chips de filtro
+document.querySelectorAll('.chip-filtro').forEach(chip => chip.addEventListener('click', () => {
+  const campo = chip.dataset.campo, valor = chip.dataset.chip;
+  if (valor === 'todos') {
+    document.getElementById('filtroCategoria').value = 'todos';
+    document.getElementById('filtroModalidad').value = 'todos';
+  } else if (campo === 'mod') {
+    document.getElementById('filtroModalidad').value = valor;
+    document.getElementById('filtroCategoria').value = 'todos';
+  } else {
+    document.getElementById('filtroCategoria').value = valor;
+    document.getElementById('filtroModalidad').value = 'todos';
+  }
+  document.querySelectorAll('.chip-filtro').forEach(c => c.classList.remove('on'));
+  chip.classList.add('on');
+  cambiarFiltro();
+}));
+
 try {
   firebase.initializeApp(firebaseConfig);
   referenciaSolicitudes = firebase.database().ref('solicitudes_ayuda');
@@ -1107,18 +1259,31 @@ function crearIcono(mod, atendido) {
 }
 
 function aplicarFiltrosYOrden() {
-  const cat = document.getElementById('filtroCategoria').value, mod = document.getElementById('filtroModalidad').value, orden = document.getElementById('ordenamiento').value;
+  const cat = document.getElementById('filtroCategoria').value;
+  const mod = document.getElementById('filtroModalidad').value;
+  const orden = document.getElementById('ordenamiento').value;
+  
   let r = listaGlobalPublicaciones.filter(p => !p.desactivado);
-  const nN = r.filter(p => p.modalidad === 'necesita').length, nO = r.filter(p => p.modalidad === 'ofrece').length, nV = r.filter(p => (p.verificaciones||1) >= 3).length;
+  const nN = r.filter(p => p.modalidad === 'necesita').length;
+  const nO = r.filter(p => p.modalidad === 'ofrece').length;
+  const nV = r.filter(p => (p.verificaciones||1) >= 3).length;
+
   document.getElementById('stat-necesita').textContent = nN;
   document.getElementById('stat-ofrece').textContent = nO;
   document.getElementById('stat-validados').textContent = nV;
 
   if (cat !== 'todos') r = r.filter(p => (p.tiposActivos||[]).includes(cat) || (p.tiposInactivos||[]).includes(cat));
-  if (mod !== 'todos') r = r.filter(p => p.modalidad === mod);
+  
+  if (mod === 'validados') {
+    r = r.filter(p => (p.verificaciones || 1) >= 3);
+  } else if (mod !== 'todos') {
+    r = r.filter(p => p.modalidad === mod);
+  }
+
   if (orden === 'urgentes') { const peso = { 'Alta': 3, 'Media': 2, 'Baja': 1 }; r.sort((a, b) => (peso[b.prioridad]||0) - (peso[a.prioridad]||0)); }
   else if (orden === 'cercanos' && ubicacionUsuarioGPS) { r.sort((a, b) => calcularDistanciaKm(ubicacionUsuarioGPS.lat, ubicacionUsuarioGPS.lng, a.lat, a.lng) - calcularDistanciaKm(ubicacionUsuarioGPS.lat, ubicacionUsuarioGPS.lng, b.lat, b.lng)); }
   else { r.sort((a, b) => (b.fechaCreacion || 0) - (a.fechaCreacion || 0)); }
+  
   renderizarContenedorYMapa(r);
 }
 
